@@ -146,6 +146,18 @@ class WebServer {
           builder.append("\n");
           builder.append(page);
 
+
+           //custom request: repeating word in a sentence
+          builder.append("<h2>Custom requests:</h2>");
+          builder.append("<p><b>Repeating word</b></p>");
+          builder.append("<p>Tests how many times a word repeats in a sentence.</p>");
+          builder.append("<p>Usage: http://localhost:9000/repeatingword?text=hello beautiful beautiful people&targetWord=beautiful</p>");
+
+          //custom request: Bigger number
+            builder.append("<p><b>Bigger number</b></p>");
+            builder.append("<p>Compares two numbers and tells which one is bigger</p>");
+            builder.append("<p>Usage: http://localhost:9000/compare?num1=10&num2=5</p>");
+
         } else if (request.equalsIgnoreCase("json")) {
           // shows the JSON of a random image and sets the header name for that image
 
@@ -297,6 +309,65 @@ class WebServer {
                         builder.append("Content-Type: text/html; charset=utf-8\n\n");
                         builder.append("Error:  Unable to parse Github response");
                     }
+                }
+            }
+
+            //request that analyzes how many times a word repeats in a setence
+        } else if (request.contains("repeatingword?")) {
+            Map<String, String> query_pairs = splitQuery(request.replace("repeatingword?", ""));
+
+            String text = query_pairs.get("text");
+            String targetWord = query_pairs.get("targetWord");
+
+            if (text == null || targetWord == null) {
+                builder.append("HTTP/1.1 400 Bad Request\n");
+                builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                builder.append("Error: missing parameters text and targetWord");
+            } else {
+                builder.append("HTTP/1.1 200 OK\n");
+                builder.append("Content-Type: text/html; charset=utf-8\n\n");
+
+                String[] words = text.split("\\s+");
+
+                int occurrences = 0;
+                for (String word : words) {
+                    if (word.equalsIgnoreCase(targetWord)) {
+                        occurrences++;
+                    }
+                }
+                builder.append("Target word: ").append(targetWord).append("<br>");
+                builder.append("Word occurrences: ").append(occurrences).append("<br>");
+
+            }
+            //request that compares two numbers and tells which is bigger
+        } else if (request.contains("compare?")){
+            Map<String, String> query_pairs = splitQuery(request.replace("compare?", ""));
+            String num1Str = query_pairs.get("num1");
+            String num2Str = query_pairs.get("num2");
+
+            if (num1Str == null || num2Str == null) {
+                builder.append("HTTP/1.1 400 Bad Request\n");
+                builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                builder.append("Error: missing parameters num1 and num2 required");
+            } else {
+                try {
+                    int num1 =  Integer.parseInt(num1Str);
+                    int num2 =  Integer.parseInt(num2Str);
+
+                    builder.append("HTTP/1.1 200 OK\n");
+                    builder.append("Content-Type: text/html; charset=utf-8\n\n");
+
+                    if(num1 > num2) {
+                        builder.append(num1 + " is greater than " + num2 );
+                    } else if (num2 > num1) {
+                        builder.append(num2 + " is greater than " + num1);
+                    }else {
+                        builder.append("both numbers are equal");
+                    }
+                } catch (NumberFormatException e) {
+                    builder.append("HTTP/1.1 400 Bad Request\n");
+                    builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                    builder.append("Error: num1 and num2 must be valid integers");
                 }
             }
 
