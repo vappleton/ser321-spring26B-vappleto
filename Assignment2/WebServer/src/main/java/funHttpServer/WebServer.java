@@ -201,21 +201,39 @@ class WebServer {
           // extract path parameters
           query_pairs = splitQuery(request.replace("multiply?", ""));
 
-          // extract required fields from parameters
-          Integer num1 = Integer.parseInt(query_pairs.get("num1"));
-          Integer num2 = Integer.parseInt(query_pairs.get("num2"));
+          String num1Str = query_pairs.get("num1");
+          String num2Str = query_pairs.get("num2");
 
-          // do math
-          Integer result = num1 * num2;
 
-          // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Result is: " + result);
 
-          // TODO: Include error handling here with a correct error code and
-          // a response that makes sense
+          if (num1Str == null || num2Str == null) { //checks if parameters are missing first
+              builder.append("HTTP/1.1 400 Bad Request\n");
+              builder.append("Content-Type: text/html; charset=utf-8\n");
+              builder.append("\n");
+              builder.append("Error: Parameters are missing. Please provide num1 and num2.\n");
+          } else {
+              try {
+                  // extract required fields from parameters
+                  Integer num1 = Integer.parseInt(num1Str);
+                  Integer num2 = Integer.parseInt(num2Str);
+                  //do math
+                  Integer result = num1 * num2;
+                  //Generate response
+                  builder.append("HTTP/1.1 200 OK\n");
+                  builder.append("Content-Type: text/html; charset=utf-8\n");
+                  builder.append("\n");
+                  builder.append("Result is:" + result);
+
+
+                  // TODO: Include error handling here with a correct error code and
+                  // a response that makes sense
+              } catch (NumberFormatException e) {
+                  builder.append("HTTP/1.1 400 Bad Request\n");
+                  builder.append("Content-Type: text/html; charset=utf-8\n");
+                  builder.append("\n");
+                  builder.append("Error: num1 and num2 must be valid integers");
+              }
+          }
 
         } else if (request.contains("github?")) {
           // pulls the query from the request and runs it with GitHub's REST API
