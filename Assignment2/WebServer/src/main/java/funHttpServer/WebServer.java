@@ -405,16 +405,18 @@ class WebServer {
     for (String pair : pairs) {
         int idx = pair.indexOf("=");
 
-        if (idx == -1)continue;
+        if (idx == -1) continue;
         try {
 
-          query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
-              URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+            query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"),
+                    URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
         } catch (Exception e) {
-            query_pairs.put(pair.substring(0, idx),pair.substring(idx +1));
+            query_pairs.put(pair.substring(0, idx), pair.substring(idx + 1));
         }
-    // {{"q", "hello world/me"}, {"bob","5"}}
+        // {{"q", "hello world/me"}, {"bob","5"}}
+    }
     return query_pairs;
+
   }
 
   /**
