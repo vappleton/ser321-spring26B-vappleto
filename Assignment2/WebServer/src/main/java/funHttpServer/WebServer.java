@@ -59,7 +59,7 @@ class WebServer {
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
-      if (server!= null) {
+      if (sock != null) {
         try {
           server.close();
         } catch (IOException e) {
