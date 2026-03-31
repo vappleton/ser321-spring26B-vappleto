@@ -151,12 +151,12 @@ class WebServer {
           builder.append("<h2>Custom requests:</h2>");
           builder.append("<p><b>Repeating word</b></p>");
           builder.append("<p>Tests how many times a word repeats in a sentence.</p>");
-          builder.append("<p>Usage: http://localhost:9000/repeatingword?text=hello beautiful beautiful people&targetWord=beautiful</p>");
+          builder.append("<p>Usage: http://18.222.151.192:9000/repeatingword?text=hello beautiful beautiful people&targetWord=beautiful</p>");
 
           //custom request: Bigger number
             builder.append("<p><b>Bigger number</b></p>");
             builder.append("<p>Compares two numbers and tells which one is bigger</p>");
-            builder.append("<p>Usage: http://localhost:9000/compare?num1=10&num2=5</p>");
+            builder.append("<p>Usage: http://18.222.151.192:9000/compare?num1=10&num2=5</p>");
 
         } else if (request.equalsIgnoreCase("json")) {
           // shows the JSON of a random image and sets the header name for that image
