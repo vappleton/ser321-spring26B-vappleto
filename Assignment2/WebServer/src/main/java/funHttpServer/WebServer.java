@@ -25,6 +25,8 @@ import java.util.Random;
 import java.util.Map;
 import java.util.LinkedHashMap;
 import java.nio.charset.Charset;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 class WebServer {
   public static void main(String args[]) {
@@ -236,25 +238,67 @@ class WebServer {
           }
 
         } else if (request.contains("github?")) {
-          // pulls the query from the request and runs it with GitHub's REST API
-          // check out https://docs.github.com/rest/reference/
-          //
-          // HINT: REST is organized by nesting topics. Figure out the biggest one first,
-          //     then drill down to what you care about
-          // "Owner's repo is named RepoName. Example: find RepoName's contributors" translates to
-          //     "/repos/OWNERNAME/REPONAME/contributors"
+            // pulls the query from the request and runs it with GitHub's REST API
+            // check out https://docs.github.com/rest/reference/
+            //
+            // HINT: REST is organized by nesting topics. Figure out the biggest one first,
+            //     then drill down to what you care about
+            // "Owner's repo is named RepoName. Example: find RepoName's contributors" translates to
+            //     "/repos/OWNERNAME/REPONAME/contributors"
 
-          Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-          query_pairs = splitQuery(request.replace("github?", ""));
-          String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
-          System.out.println(json);
+            Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+            query_pairs = splitQuery(request.replace("github?", ""));
 
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("Check the todos mentioned in the Java source file");
-          // TODO: Parse the JSON returned by your fetch and create an appropriate
-          // response based on what the assignment document asks for
+            //First making sure the query has all the parameters
+            String query = query_pairs.get("query");
+
+            if (query == null) {
+                builder.append("HTTP/1.1 400 Bad Request\n");
+                builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                builder.append("Error:Missing query parameters");
+
+            } else { //checking fetch failure
+                String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
+                if (json == null || json.isEmpty()) {
+                    builder.append("HTTP/1.1 500 Internal Server Error\n");
+                    builder.append("Content-Type: text/html; charset=utf-8\n");
+                    builder.append("Error:  Failed to fetch data from Github");
+                } else {
+                    try {
+                        JSONArray reposArray = new JSONArray(json);
+                        builder.append("HTTP/1.1 200 OK\n");
+                        builder.append("Content-Type: text/html; charset=utf-8\n");
+                        builder.append("\n");
+                        // TODO: Parse the JSON returned by your fetch and create an appropriate
+                        // response based on what the assignment document asks for
+
+                        builder.append("<htlm><body>");
+                        builder.append("<h2>Repositories:<h2>");
+                        builder.append("<ul>");
+                        for (int i = 0; i < reposArray.length(); i++) {
+                            JSONObject repo = reposArray.getJSONObject(i);
+
+                            String fullName = repo.getString("full_name");
+                            int id = repo.getInt("id");
+                            String owner = repo.getJSONObject("owner").getString("login");
+
+                            builder.append("<li>");
+                            builder.append("Name: ").append(fullName).append("<br>");
+                            builder.append("ID: ").append(id).append("<br>");
+                            builder.append("Owner: ").append(owner).append("<br>");
+                            builder.append("</li><br>");
+                        }
+                        builder.append("</ul>");
+                        builder.append("</body></html>");
+
+                    } catch (Exception e) {
+                        //handle bad Json
+                        builder.append("HTTP/1.1 500 Internal Server Error\n");
+                        builder.append("Content-Type: text/html; charset=utf-8\n\n");
+                        builder.append("Error:  Unable to parse Github response");
+                    }
+                }
+            }
 
         } else {
           // if the request is not recognized at all
