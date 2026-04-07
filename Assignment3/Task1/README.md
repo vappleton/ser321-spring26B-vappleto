@@ -139,6 +139,76 @@ Error response:
 4. Document ALL possible error cases (hint: there are at least 4 different error cases)
 
 YOUR PROTOCOL DOCUMENTATION GOES HERE
+Request:
+
+    {
+        "type" : "calculatemany",
+        "numList" : <Array>, -- Array of numbers -- Array must be a list of integers
+        "operation" : <String> -- "add","multiply", or "average"
+    }
+
+General response
+
+    {
+        "type" : "calculatemany", 
+        "ok" : <bool>, -- true or false depending on request
+        "operation" : <String>, -operation to perform
+        "count" : <int>
+        //Depending on the opration:
+        "sum": <int>,
+        "product" : <int>,
+        "average" : <double>,
+        "message" : <String>,  -- error message only if ok is false
+    }
+
+
+Success response:
+
+    {
+        "type" : "calculatemany",
+        "ok" : true,
+        "operation": "add",
+        "count": <int>,
+        "sum": <int>
+    }
+    {
+        "type" : "calculatemany",
+        "ok" : true,
+        "operation": "multiply",
+        "count": <int>,
+        "product": <int>
+    }
+    {
+        "type" : "calculatemany",
+        "ok" : true,
+        "operation": "average",
+        "count": <int>,
+        "average": <double> 
+    }
+
+Error response:
+
+    {
+        "ok" : false,
+        "message" : "Missing field NumList"
+    }
+    {
+        "ok" : false,
+        "message" : "Missing field operation"
+    }
+    {
+        "ok" : false,
+        "message" : "Array numList can't be empty"
+    }
+    {
+        "ok" : false,
+        "message" : "Invalid operation. Valid operations are add, multiply and average"
+    }
+    {
+        "ok" : false,
+        "message" : "Numbers in numList must be integers"
+    }
+
 
 ### StringConcatenation: ###
 This service will concatenate two strings provided by the client. The client will send a request to the server with two strings to be concatenated.
