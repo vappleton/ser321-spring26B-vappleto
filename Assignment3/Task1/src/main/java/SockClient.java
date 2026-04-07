@@ -38,68 +38,95 @@ class SockClient {
       System.out.println("Client connected to server.");
       boolean requesting = true;
       while (requesting) {
-        System.out.println("What would you like to do: 1 - echo, 2 - add, 3 - string concatenation (0 to quit)");
-        Scanner scanner = new Scanner(System.in);
-        int choice = Integer.parseInt(scanner.nextLine());
-        // You can assume the user put in a correct input, you do not need to handle errors here
-        // You can assume the user inputs a String when asked and an int when asked. So you do not have to handle user input checking
-        JSONObject json = new JSONObject(); // request object
-        switch(choice) {
-          case 0:
-            System.out.println("Choose quit. Thank you for using our services. Goodbye!");
-            requesting = false;
-            break;
-          case 1:
-            System.out.println("Choose echo, which String do you want to send?");
-            String message = scanner.nextLine();
-            json.put("type", "echo");
-            json.put("data", message);
-            break;
-          case 2:
-            System.out.println("Choose add, enter first number:");
-            String num1 = scanner.nextLine();
-            json.put("type", "add");
-            json.put("num1", num1);
+          System.out.println("What would you like to do: 1 - echo, 2 - add, 3 - string concatenation, 4 - calculate many (0 to quit)");
+          Scanner scanner = new Scanner(System.in);
+          int choice = Integer.parseInt(scanner.nextLine());
+          // You can assume the user put in a correct input, you do not need to handle errors here
+          // You can assume the user inputs a String when asked and an int when asked. So you do not have to handle user input checking
+          JSONObject json = new JSONObject(); // request object
+          switch (choice) {
+              case 0:
+                  System.out.println("Choose quit. Thank you for using our services. Goodbye!");
+                  requesting = false;
+                  break;
+              case 1:
+                  System.out.println("Choose echo, which String do you want to send?");
+                  String message = scanner.nextLine();
+                  json.put("type", "echo");
+                  json.put("data", message);
+                  break;
+              case 2:
+                  System.out.println("Choose add, enter first number:");
+                  String num1 = scanner.nextLine();
+                  json.put("type", "add");
+                  json.put("num1", num1);
 
-            System.out.println("Enter second number:");
-            String num2 = scanner.nextLine();
-            json.put("num2", num2);
-            break;
-          case 3:
-            System.out.println("Choose string concatenation, enter first string:");
-            String str1 = scanner.nextLine();
-            System.out.println("Enter second string:");
-            String str2 = scanner.nextLine();
-            json.put("type", "stringconcatenation");
-            json.put("str1", str1);
-            json.put("string2", str2);
-            break;
-            // TODO: implement currency (4) or playlist (5) for Part C
-        }
-        if(!requesting) {
-          continue;
-        }
+                  System.out.println("Enter second number:");
+                  String num2 = scanner.nextLine();
+                  json.put("num2", num2);
+                  break;
+              case 3:
+                  System.out.println("Choose string concatenation, enter first string:");
+                  String str1 = scanner.nextLine();
+                  System.out.println("Enter second string:");
+                  String str2 = scanner.nextLine();
+                  json.put("type", "stringconcatenation");
+                  json.put("str1", str1);
+                  json.put("string2", str2);
+                  break;
+              case 4:
+                  System.out.println("Choose calculate many. Enter numbers separated by commas (e.g. 1,2,3,4):");
+                  String numArray = scanner.nextLine();
+                  System.out.println("Enter operation (add, multiply, average):");
+                  String operation = scanner.nextLine();
 
-        // write the whole message
-        os.writeObject(json.toString());
-        // make sure it wrote and doesn't get cached in a buffer
-        os.flush();
+                  json.put("type", "calculatemany");
 
-        // handle the response
-        // - not doing anything other than printing some things, make this better
-        // !! you will most likely need to parse the response for the other 2 services!
-        String i = (String) in.readUTF();
-        JSONObject res = new JSONObject(i);
-        System.out.println("Got response: " + res);
-        if (res.getBoolean("ok")){
-          if (res.getString("type").equals("echo")) {
-            System.out.println(res.getString("echo"));
-          } else {
-            System.out.println(res.getInt("result"));
+                  String[] parts = numArray.split(",");
+                  JSONArray array = new JSONArray();
+                  for (String part : parts) {
+                      array.put(Integer.parseInt(part.trim()));
+                  }
+                  json.put("numList", array);
+                  json.put("operation", operation);
+                  break;
+
+              // TODO: implement currency (4) or playlist (5) for Part C
           }
-        } else {
-          System.out.println(res.getString("message"));
-        }
+          if (!requesting) {
+              continue;
+          }
+
+          // write the whole message
+          os.writeObject(json.toString());
+          // make sure it wrote and doesn't get cached in a buffer
+          os.flush();
+
+          // handle the response
+          // - not doing anything other than printing some things, make this better
+          // !! you will most likely need to parse the response for the other 2 services!
+          String i = (String) in.readUTF();
+          JSONObject res = new JSONObject(i);
+          System.out.println("Got response: " + res);
+          if (res.getBoolean("ok")) {
+              if (res.getString("type").equals("echo")) {
+                  System.out.println(res.getString("echo"));
+              } else if (res.getString("type").equals("calculatemany")) {
+                  String operation = res.getString("operation");
+
+                  if (operation.equalsIgnoreCase("add")) {
+                      System.out.println("Sum: " + res.getInt("sum"));
+                  } else if (operation.equalsIgnoreCase("multiply")) {
+                      System.out.println("Product: " + res.getInt("product"));
+                  } else if (operation.equalsIgnoreCase("average")) {
+                      System.out.println("Average: " + res.getDouble("average"));
+                  }
+              } else {
+                  System.out.println(res.getInt("result"));
+              }
+          } else {
+              System.out.println(res.getString("message"));
+          }
       }
       // want to keep requesting services so don't close connection
       //overandout();
