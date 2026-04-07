@@ -56,4 +56,31 @@ public class Testing {
         assertEquals(res3.getBoolean("ok"), false);
         assertEquals(res3.getString("message"), "Field data needs to be of type: String");
     }
+
+    @Test
+    public void currencyCorrect() {
+        JSONObject req = new JSONObject();
+
+        req.put("type", "currency");
+        req.put("amount", 100);
+        req.put("from", "USD");
+        req.put("to", "EUR");
+
+        JSONObject result = SockServer.currency(req);
+
+        assertTrue(result.getBoolean("ok"));
+        assertEquals(92.0, result.getDouble("result"), 0.01);
+
+    }
+    @Test
+    public void currencyError() { // testing for negative amount
+        JSONObject req = new JSONObject();
+        req.put("type", "currency");
+        req.put("amount", -100);
+        req.put("from", "USD");
+        req.put("to", "EUR");
+
+        JSONObject res = SockServer.currency(req);
+        assertFalse(res.getBoolean("ok"));
+    }
 }
