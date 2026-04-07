@@ -143,8 +143,8 @@ Request:
 
     {
         "type" : "calculatemany",
-        "numList" : <Array>, -- Array of numbers -- Array must be a list of integers
-        "operation" : <String> -- "add","multiply", or "average"
+        "numList" : <Array>, -- Required non-empty array of integers, e.g. [1,2,3,4]. 
+        "operation" : <String> -- Required operation type: "add", "multiply", or "average". 
     }
 
 General response
@@ -169,21 +169,21 @@ Success response:
         "ok" : true,
         "operation": "add",
         "count": <int>,
-        "sum": <int>
+        "sum": <int> --result of adding all numbers:  e.g [1,2,3,4] = 10
     }
     {
         "type" : "calculatemany",
         "ok" : true,
         "operation": "multiply",
         "count": <int>,
-        "product": <int>
+        "product": <int> --result of multiplying all numbers: e.g [1,2,3,4] = 24
     }
     {
         "type" : "calculatemany",
         "ok" : true,
         "operation": "average",
         "count": <int>,
-        "average": <double> 
+        "average": <double> -- average of all numbers rounded to two decimal places: e.g [1,2,3,4] = 3.33
     }
 
 Error response:
@@ -198,7 +198,7 @@ Error response:
     }
     {
         "ok" : false,
-        "message" : "Array numList can't be empty"
+        "message" : "Array 'numList' cannot be empty"
     }
     {
         "ok" : false,
