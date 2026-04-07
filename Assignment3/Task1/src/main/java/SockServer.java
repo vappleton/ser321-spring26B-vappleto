@@ -181,11 +181,11 @@ public class SockServer {
 
     res = new JSONObject();
     res.put("ok", true);
-    res.put("type", "concat");
+    res.put("type", "stringconcatenation");
 
     String str1 = req.getString("string1");
     String str2 = req.getString("string2");
-    res.put("combined", str1 + str2);
+    res.put("result", str1 + str2);
 
     return res;
   }

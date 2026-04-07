@@ -71,7 +71,7 @@ class SockClient {
                   System.out.println("Enter second string:");
                   String str2 = scanner.nextLine();
                   json.put("type", "stringconcatenation");
-                  json.put("str1", str1);
+                  json.put("string1", str1);
                   json.put("string2", str2);
                   break;
               case 4:
@@ -121,6 +121,9 @@ class SockClient {
                   } else if (operation.equalsIgnoreCase("average")) {
                       System.out.println("Average: " + res.getDouble("average"));
                   }
+              } else if (res.getString("type").equals("stringconcatenation")) {
+                  System.out.println(res.getString("result"));
+
               } else {
                   System.out.println(res.getInt("result"));
               }
