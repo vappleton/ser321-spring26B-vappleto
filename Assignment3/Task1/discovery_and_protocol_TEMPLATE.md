@@ -332,12 +332,16 @@ Same General error responses apply
 
 ## Part 3: Summary
 
-**Total Operations Discovered:**
-3 (wordcount, charcount and search)
-**How I approached discovery:**
+**Total Operations Discovered:**  
+
+3 (wordcount, charcount and search)  
+
+**How I approached discovery:**  
+
 I started with a minimal request and used the error messages returned by the service to guide my next steps. 
 I then added required fields and tested different action values. Each response helped me identify the required fields, 
-supported operations, and the structure of the output.
+supported operations, and the structure of the output.  
 
-**Most challenging part:**
+**Most challenging part:**  
+
 The most challenging part was interpreting the error messages and understanding how each message corresponded to missing fields or incorrect inputs.
