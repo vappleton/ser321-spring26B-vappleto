@@ -52,6 +52,7 @@ I learned that the analyzer service requires an action field
 **What I Learned:**  
 
 The analyzer service also requires a text field . 
+
 ---
 
 ### Attempt 3
