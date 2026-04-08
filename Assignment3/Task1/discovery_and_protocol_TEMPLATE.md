@@ -222,25 +222,6 @@ This service performs text analysis using three operations: wordcount, charcount
 
 ### General Error responses
 
-```json
-{
-  "ok": false,
-  "message": "Field 'action' does not exist in request"
-}
-
-```
-```json
-{
-  "ok": false,
-  "message": "Field 'text' does not exist in request"
-}
-```
-```json
-{
-  "ok": false,
-  "message": "Action '<value>' not supported. Valid actions: wordcount, charcount, search"
-}
-```
 
 #### [wordcount]
 
@@ -327,9 +308,26 @@ Same General error responses apply
   "message" :"Field 'find' does not exist in request" 
 
 }
-Plus all general error responses above. 
 ```
+```json
+{
+  "ok": false,
+  "message": "Field 'action' does not exist in request"
+}
+```
+```json
+{
+  "ok": false,
+  "message": "Field 'text' does not exist in request"
+}
 
+```
+```json
+{
+  "ok": false,
+  "message": "Action '<value>' not supported. Valid actions: wordcount, charcount, search"
+}
+```
 ---
 
 ## Part 3: Summary
