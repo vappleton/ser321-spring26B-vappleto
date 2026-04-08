@@ -229,9 +229,6 @@ Follow the same format as Task 1.1 README protocols.
 
 This service performs text analysis using three operations: wordcount, charcount and search. 
 
-### General Error responses
-
-
 #### [wordcount]
 
 **Request:**
@@ -253,9 +250,6 @@ This service performs text analysis using three operations: wordcount, charcount
   "ok": true
 }
 ```
-
-**Error Responses:**
-Same General error responses apply
 
 
 #### [charcount]
@@ -279,9 +273,6 @@ Same General error responses apply
   "ok": true
 }
 ```
-
-**Error Responses:**
-Same General error responses apply
 
 #### [search]
 
@@ -308,7 +299,7 @@ Same General error responses apply
   "positions": <Array of int>
 }
 ```
-
+### General Error responses 
 **Error Responses:**
 
 ```json
