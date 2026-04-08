@@ -38,7 +38,7 @@ class SockClient {
       System.out.println("Client connected to server.");
       boolean requesting = true;
       while (requesting) {
-          System.out.println("What would you like to do: 1 - echo, 2 - add, 3 - string concatenation, 4 - calculate many, 5 - Currency Converter (0 to quit)");
+          System.out.println("What would you like to do: 1 - echo, 2 - add, 3 - string concatenation, 4 - calculate many, 5 - Currency Converter, 6- Test analyzer (0 to quit)");
           Scanner scanner = new Scanner(System.in);
           int choice = Integer.parseInt(scanner.nextLine());
           // You can assume the user put in a correct input, you do not need to handle errors here
@@ -106,6 +106,26 @@ class SockClient {
                   json.put("from", from);
                   json.put("to", to);
                   break;
+
+              case 6:
+                  System.out.println("Testing analyzer...");
+                  System.out.println("Choose action: (wordcount, charcount, search)");
+                  String action = scanner.nextLine();
+
+                  System.out.println("Enter text to analyze:");
+                  String text = scanner.nextLine();
+
+
+                  json.put("type", "analyzer");
+                  json.put("action", action);
+                  json.put("text", text);
+
+                  if (action.equalsIgnoreCase("search")) {
+                      System.out.println("What would you like to find?:");
+                      String searchTarget = scanner.nextLine();
+                      json.put("find", searchTarget);
+                  }
+                  break;
           }
           if (!requesting) {
               continue;
@@ -137,9 +157,26 @@ class SockClient {
                   }
               } else if (res.getString("type").equals("stringconcatenation")) {
                   System.out.println(res.getString("result"));
-              } else if (res.getString("type").equals("currency")){
+
+              } else if (res.getString("type").equals("currency")) {
                   System.out.println("Result: " + res.getDouble("result"));
                   System.out.println("Rate: " + res.getDouble("rate"));
+
+              } else if (res.getString("type").equals("analyzer")) {
+                  System.out.println("Action: " + res.getString("action"));
+
+                  if (res.getString("action").equals("wordcount")) {
+                      System.out.println("Word count: " + res.getInt("count"));
+
+                  } else if (res.getString("action").equals("charcount")) {
+                      System.out.println("Character count: " + res.getInt("count"));
+
+                  } else if (res.getString("action").equals("search")){
+                      System.out.println("Search term: " + res.getString("find"));
+                      System.out.println("Found: " + res.getBoolean("found"));
+                      System.out.println("Count: " + res.getInt("count"));
+                      System.out.println("Positions: " + res.getJSONArray("positions"));
+                  }
               } else {
                   System.out.println(res.getInt("result"));
               }
