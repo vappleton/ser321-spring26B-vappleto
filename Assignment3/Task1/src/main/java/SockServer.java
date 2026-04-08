@@ -94,6 +94,8 @@ public class SockServer {
             res = calculatemany(req);
           } else if (req.getString("type").equals("stringconcatenation")) {
             res = concat(req);
+          } else if (req.getString("type").equals("currency")) {
+            res = currency(req);
           } else if (req.getString("type").equals("analyzer")) {
             // Mystery service - discover the protocol
             res = MysteryService.processRequest(req);
@@ -267,6 +269,87 @@ public class SockServer {
     }
 
     return res;
+  }
+
+  //handles the currency request
+  static JSONObject currency(JSONObject req) {
+      System.out.println("Currency request: " + req.toString());
+
+      JSONObject field = testField(req, "amount");
+      if (!field.getBoolean("ok")) return field;
+
+      field = testField(req, "from");
+      if (!field.getBoolean("ok")) return field;
+
+      field = testField(req, "to");
+      if (!field.getBoolean("ok"))  return field;
+
+      double amount = req.getDouble("amount");
+      String from =  req.getString("from").toUpperCase();
+      String to = req.getString("to").toUpperCase();
+
+      //checking for negative amounts
+      if (amount < 0) {
+          field = new JSONObject();
+          field.put("ok", false);
+          field.put("message", "Field 'amount' cannot be negative");
+          return field;
+      }
+      //checking for invalid currency
+      if (!(from.equals("USD") || from.equals("EUR") || from.equals("GBP"))) {
+          field = new JSONObject();
+          field.put("ok", false);
+          field.put("message", "source currency must be one of: USD, EUR, or GBP");
+          return field;
+      }
+      if (!(to.equals("USD") || to.equals("EUR") || to.equals("GBP"))) {
+          field = new JSONObject();
+          field.put("ok", false);
+          field.put("message", "target currency must be one of: USD, EUR, or GBP");
+          return field;
+      }
+
+      //conversion rates
+      double usdToEur = 0.92;
+      double usdTogbp = 0.79;
+
+      //conversion from other currencies to USD
+      double amountInUSD;
+
+      if (from.equals("USD")) {
+          amountInUSD = amount;
+      } else if (from.equals("EUR")) {
+          amountInUSD = amount/usdToEur;
+      } else {
+          amountInUSD = amount/usdTogbp;
+      }
+      //conversion from usd to other currencies
+      double convertedCurrency;
+      double rate;
+      if (to.equals("USD")) {
+          convertedCurrency = amountInUSD;
+          rate = 1.0;
+      } else if (to.equals("EUR")) { //to EUR
+          convertedCurrency = amountInUSD * usdToEur;
+          rate = usdToEur;
+      } else { //to GBP
+          convertedCurrency = amountInUSD * usdTogbp;
+          rate = usdTogbp;
+      }
+      //rounding result to 2 decimals
+      convertedCurrency = Math.round(convertedCurrency *100.00) / 100.0;
+
+      field = new JSONObject();
+      field.put("type", "currency");
+      field.put("ok", true);
+      field.put("from", from);
+      field.put("to", to);
+      field.put("amount", amount);
+      field.put("result", convertedCurrency);
+      field.put("rate", rate);
+
+      return field;
+
   }
 
 
