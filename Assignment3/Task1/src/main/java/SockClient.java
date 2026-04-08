@@ -138,8 +138,8 @@ class SockClient {
               } else if (res.getString("type").equals("stringconcatenation")) {
                   System.out.println(res.getString("result"));
               } else if (res.getString("type").equals("currency")){
-                  System.out.println("Converted: " + res.getDouble("result"));
-                  System.out.println("Rate used: " + res.getDouble("rate"));
+                  System.out.println("Result: " + res.getDouble("result"));
+                  System.out.println("Rate: " + res.getDouble("rate"));
               } else {
                   System.out.println(res.getInt("result"));
               }
