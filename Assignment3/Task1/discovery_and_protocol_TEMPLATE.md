@@ -25,7 +25,8 @@ Document at least 8 test attempts showing your systematic investigation.
   "message": "Field 'action' does not exist in request. Hint: what action do you want to perform?"
 }
 ```
-**What I Learned:**
+**What I Learned:**  
+
 I learned that the analyzer service requires an action field
 
 ---
@@ -48,7 +49,8 @@ I learned that the analyzer service requires an action field
 }
 ```
 
-**What I Learned:**
+**What I Learned:**  
+
 The analyzer service also requires a text field . 
 ---
 
@@ -71,7 +73,8 @@ The analyzer service also requires a text field .
 }
 ```
 
-**What I Learned:**
+**What I Learned:**  
+
  The analyzer service supports three actions: "wordcount", "charcount", and "search"
 
 
@@ -97,7 +100,8 @@ The analyzer service also requires a text field .
 }
 ```
 
-**What I Learned:**
+**What I Learned:**  
+
 The wordcount action returns the number of words in the input text using the "count" field. 
 
 ---
@@ -121,7 +125,8 @@ The wordcount action returns the number of words in the input text using the "co
 }
 ```
 
-**What I Learned:**
+**What I Learned:**  
+
 The charcount action returns the number of characters in a string including whitespaces
 
 
@@ -145,7 +150,8 @@ The charcount action returns the number of characters in a string including whit
 }
 ```
 
-**What I Learned:**
+**What I Learned:**  
+
 The search action requires an additional "find" field specifying what to search for. 
 
 
@@ -174,7 +180,8 @@ The search action requires an additional "find" field specifying what to search 
 }
 ```
 
-**What I Learned:**
+**What I Learned:**  
+
 The search action finds a target character in a string and returns whether that value was found, the number of matches ("count")
 and the positions of each match ("positions")
 
@@ -204,7 +211,8 @@ and the positions of each match ("positions")
 }
 ```
 
-**What I Learned:**
+**What I Learned:**  
+
 The search action also supports searching for full substrings, not just single characters. The "positions" field
 returns the index where the match begins.
 
