@@ -400,17 +400,17 @@ and the server processes them and returns JSON responses.
 [Explain your approach to error handling:]
 
 **Server-side validation:**
-- [What validations does your server perform?]
+- What validations does your server perform?
   The server validates all incoming requests for the required fields such as "type", "action", and other parameters
 
-- [How do you handle missing fields?]
-  Missing fields return a JSON response with ok = false and a descriptive error message that specifies what went wrong,
-- and prompting the user to enter the required field.
+- How do you handle missing fields?  
+  Missing fields return a JSON response with ok = false and a descriptive error message that specifies what went wrong, 
+  and prompting the user to enter the required field.
 
-- [How do you handle invalid data types?]
+- How do you handle invalid data types?
   Invalid data types such as non-string letter inputs are handled with the appropriate error message
 
-- [How do you handle game state errors?]
+- How do you handle game state errors?  
   Game state errors are handled by validating the current state of the game before processing requests.
   For example, the server checks whether a game is currently active before allowing actions such as
   guessing letters, requesting hints, or guessing the word.
@@ -422,18 +422,18 @@ and the server processes them and returns JSON responses.
 [Explain how you ensured robustness:]
 
 **Server robustness:**
-- [How does server handle invalid input without crashing?]
-- The server validates all inputs before processing and never crashes on invalid input.
-- Exceptions are handlded gracefully and converted into JSON responses. 
+- How does server handle invalid input without crashing??  
+The server validates all inputs before processing and never crashes on invalid input and the exceptions are handled 
+gracefully and converted into JSON responses. 
 
 
 **Client robustness:**
-- [How does client handle unexpected responses?]
-- The client checks the "ok" field in every response before accessingg the values
+- How does client handle unexpected responses?  
+The client checks the "ok" field in every response before accessingg the values
 
-- [What happens if server is unavailable?]
-- If the server is unavailable or disconnects, the client displays an error message ("Error communicating with server"),
-- instead of crashing.
+- What happens if server is unavailable?  
+If the server is unavailable or disconnects, the client displays an error message ("Error communicating with server"),
+instead of crashing.
 
 ---
 
@@ -449,13 +449,13 @@ and the server processes them and returns JSON responses.
 
 ## Known Issues
 
-[List any known bugs or limitations]
 
 1. Input handling ambiguity: 
 The game uses numeric inputs (1-4, 0) for menu commands while also accepting free-form input for guesses. This creates a
 limitation where numeric inputs could be interpreted as commands rather than invalid guesses. I addressed this by prioritizing
 command handling first on the client side and having the server to perform additional validation to reject non-letter inputs.
 However, this dual use of numeric inputs can be unintuitive for the user. 
+
 2. Give UP control flow bug (Fixed after recording):
 After recording the screencast, I noticed that when typing "yes" in the "GiveUp" option, the program would exi the game loop
 instead of returning to main menu. I pin pointed the problem in the incorrect return in the client's showGameMenu method. 
