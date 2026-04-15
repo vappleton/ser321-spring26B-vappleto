@@ -77,6 +77,9 @@ public class Performer {
                 // Once you start changing things more and more to proto, the JSON parts might not work anymore.
                 // That is fine, just do not call these requests until converted.
                 // Start with the "add" request.
+                if (request == null) {
+                    break; // the client disconnected
+                }
 
                 System.out.println(request);
                 Request.RequestType type = request.getType();
@@ -96,7 +99,7 @@ public class Performer {
                     case FINISH:
                         response = handleFinish(request);
                         break;
-                        case QUIT:
+                    case QUIT:
                         response = handleQuit();
                         break;
                     default:
@@ -104,7 +107,7 @@ public class Performer {
                                 .setMessage("Unknown request type: ").build();
                 }
 
-                //out.println(responseJSON.toString()); // send json
+                //out.println(responseJSON.toString()); // changed to proto below
                 response.writeDelimitedTo(outStream); //send proto
                 outStream.flush();
 
@@ -114,7 +117,14 @@ public class Performer {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error handling client: " + e.getMessage());
+            System.err.println("Client disconnected or error: " + e.getMessage());
+        }
+        finally {
+            try {
+                clientSocket.close();
+            } catch (IOException e) {
+                System.err.println("Error closing client: " + e.getMessage());
+            }
         }
     }
 
