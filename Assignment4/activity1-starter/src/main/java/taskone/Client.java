@@ -5,7 +5,9 @@ import java.net.Socket;
 import java.util.Scanner;
 import org.json.JSONObject;
 import org.json.JSONArray;
+import taskone.proto.Request;
 import taskone.proto.Response;
+import taskone.proto.TaskProto;
 
 /**
  * Task Management Client.
@@ -49,7 +51,7 @@ public class Client {
             outStream = socket.getOutputStream();
 
             // JSON uses these wrappers.
-            in = new BufferedReader(new InputStreamReader(inStream));
+           in = new BufferedReader(new InputStreamReader(inStream));
             out = new PrintWriter(outStream, true);
 
             // Use either JSON or Proto from the examples below,
@@ -138,7 +140,7 @@ public class Client {
     /**
      * Add a new task.
      */
-    private static void addTask() {
+    private static void addTask() throws IOException {
         System.out.println("\n--- Add Task ---");
         System.out.print("Enter task description: ");
         String description = scanner.nextLine().trim();
@@ -156,37 +158,43 @@ public class Client {
             return;
         }
 
-        // Create request (convert this to Proto)
-        JSONObject request = new JSONObject();
-        request.put("type", "add");
-        request.put("description", description);
-        request.put("category", category);
+        // Create request (converted to Proto)
+        Request request = Request.newBuilder()
+                .setType(Request.RequestType.ADD)
+                .setDescription(description)
+                .setCategory(category)
+                .build();
+
 
         // Send request and get response
-        JSONObject response = sendRequest(request); // Replace this with:
-        // request.writeDelimitedTo(outStream); // where request is a Request proto
-        // Response response = Response.parseDelimitedFrom(inStream); // Read response as Proto
+        //JSONObject response = sendRequest(request); // Replace this with:
+         request.writeDelimitedTo(outStream); // where request is a Request proto
+         Response response = Response.parseDelimitedFrom(inStream); // Read response as Proto
         // Then parse the Proto response.
 
 
         if (response != null) {
-            if (response.getBoolean("ok")) {
-                JSONObject taskData = response.getJSONObject("data");
+            if (response.getType() == Response.ResponseType.SUCCESS) {
                 System.out.println("Task added successfully!");
-                System.out.println("  ID: " + taskData.getInt("id"));
-                System.out.println("  Description: " + taskData.getString("description"));
-                System.out.println("  Category: " + taskData.getString("category"));
-            } else {
-                JSONObject error = response.getJSONObject("data");
-                System.out.println("Error: " + error.getString("error"));
+
+                if (response.hasTask()) {
+                    TaskProto task = response.getTask();
+
+                    System.out.println("  ID: " + task.getId());
+                    System.out.println("  Description: " + task.getDescription());
+                    System.out.println("  Category: " + task.getCategory());
+                } else {
+                    System.out.println("Error: " + response.getMessage());
+                }
             }
+
         }
     }
 
     /**
      * List tasks with filter options.
      */
-    private static void listAllTasks() {
+    private static void listAllTasks() throws IOException {
         System.out.println("\n--- List Tasks ---");
         System.out.println("1. All tasks");
         System.out.println("2. Pending tasks");
@@ -211,37 +219,38 @@ public class Client {
                 return;
         }
 
-        // Create request in JSON (convert this to Proto)
-        JSONObject request = new JSONObject();
-        request.put("type", "list");
-        request.put("filter", filter);
+        // converted  to Proto)
+        Request request = Request.newBuilder()
+                .setType(Request.RequestType.LIST)
+                .setFilter(filter)
+                .build();
 
         // Send request and get response
-        JSONObject response = sendRequest(request); // Same conversion approach as in addTask().
+        request.writeDelimitedTo(outStream); // where request is a Request proto
+        outStream.flush();
+        Response response = Response.parseDelimitedFrom(inStream);
 
         // handle response
         if (response != null) {
-            if (response.getBoolean("ok")) {
-                JSONObject data = response.getJSONObject("data");
-                JSONArray tasks = data.getJSONArray("tasks");
-                int count = data.getInt("count");
+            if (response.getType() == Response.ResponseType.SUCCESS) {
 
+                int count = response.getCount();
                 System.out.println("\n" + filter.toUpperCase() + " TASKS (" + count + "):");
-                System.out.println("─────────────────────────────────────────────────");
 
                 if (count == 0) {
                     System.out.println("No tasks found.");
                 } else {
-                    for (int i = 0; i < tasks.length(); i++) {
-                        JSONObject task = tasks.getJSONObject(i);
-                        System.out.println(formatTask(task));
+                    for (TaskProto task : response.getTasksList()) { //adding new lines so the output looks more neat
+                        System.out.println("Task ID #: " + task.getId() + "\n"
+                                + "Description: " + task.getDescription() + "\n"
+                                + "Category: " + task.getCategory() + "\n");
                     }
                 }
             } else {
-                JSONObject error = response.getJSONObject("data");
-                System.out.println("Error: " + error.getString("error"));
+                System.out.println("Error: " + response.getMessage());
             }
         }
+
     }
 
     /**
