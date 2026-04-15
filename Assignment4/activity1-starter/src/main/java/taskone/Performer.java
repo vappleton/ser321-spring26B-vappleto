@@ -96,9 +96,9 @@ public class Performer {
                     case FINISH:
                         response = handleFinish(request);
                         break;
-                    //case "quit":
-                        //responseJSON = handleQuit();
-                       // break;
+                        case QUIT:
+                        response = handleQuit();
+                        break;
                     default:
                         response = Response.newBuilder().setType(Response.ResponseType.ERROR)
                                 .setMessage("Unknown request type: ").build();
@@ -219,9 +219,10 @@ public class Performer {
         }
     }
 
-    private JSONObject handleQuit() {
-        JSONObject data = new JSONObject();
-        data.put("message", "Goodbye!");
-        return JsonUtils.createSuccessResponse("quit", data);
+    private Response handleQuit() {
+        return Response.newBuilder()
+                .setType(Response.ResponseType.SUCCESS)
+                .setMessage("Goodbye!")
+                .build();
     }
 }
