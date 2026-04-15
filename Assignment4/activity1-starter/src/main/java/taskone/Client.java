@@ -256,7 +256,7 @@ public class Client {
     /**
      * Mark a task as finished.
      */
-    private static void finishTask() {
+    private static void finishTask() throws IOException {
         System.out.println("\n--- Finish Task ---");
         System.out.print("Enter task ID to finish: ");
 
@@ -269,20 +269,27 @@ public class Client {
         }
 
         // Create request
-        JSONObject request = new JSONObject();
-        request.put("type", "finish");
-        request.put("id", id);
+        Request request = Request.newBuilder()
+                .setType(Request.RequestType.FINISH)
+                .setId(id)
+                .build();
 
         // Send request and get response
-        JSONObject response = sendRequest(request);
-        if (response != null) {
-            if (response.getBoolean("ok")) {
-                JSONObject data = response.getJSONObject("data");
-                System.out.println(data.getString("message"));
-            } else {
-                JSONObject error = response.getJSONObject("data");
-                System.out.println("Error: " + error.getString("error"));
+        try {
+            request.writeDelimitedTo(outStream);
+            outStream.flush();
+
+            Response response = Response.parseDelimitedFrom(inStream);
+
+            if (response != null) {
+                if (response.getType() == Response.ResponseType.SUCCESS) {
+                    System.out.println(response.getMessage());
+                } else {
+                    System.out.println("Error: " + response.getMessage());
+                }
             }
+        } catch (IOException e) {
+            System.out.println("Error communicating with the server: " + e.getMessage());
         }
     }
 
