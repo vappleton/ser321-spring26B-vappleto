@@ -241,9 +241,7 @@ public class Client {
                     System.out.println("No tasks found.");
                 } else {
                     for (TaskProto task : response.getTasksList()) { //adding new lines so the output looks more neat
-                        System.out.println("Task ID #: " + task.getId() + "\n"
-                                + "Description: " + task.getDescription() + "\n"
-                                + "Category: " + task.getCategory() + "\n");
+                        System.out.println(formatTask(task));
                     }
                 }
             } else {
@@ -321,9 +319,10 @@ public class Client {
     }
 
     /**
-     * Send a request to the server and receive response.
+     * Send a request to the server and receive response. //COMMENTING THIS OUT BECAUSE THE REQUESTS ARE ALREADY
+     * BEING SENT USING PROTO SO THIS JSON CODE IS NO LONGER NEEDED
      */
-    private static JSONObject sendRequest(JSONObject request) {
+    /*private static JSONObject sendRequest(JSONObject request) {
         try {
             // Send request
             out.println(request.toString());
@@ -340,16 +339,16 @@ public class Client {
             System.out.println("Error communicating with server: " + e.getMessage());
             return null;
         }
-    }
+    }*/
 
     /**
      * Format a task for display.
      */
-    private static String formatTask(JSONObject task) {
-        int id = task.getInt("id");
-        String description = task.getString("description");
-        String category = task.getString("category");
-        boolean finished = task.getBoolean("finished");
+    private static String formatTask(TaskProto task) {
+        int id = task.getId();
+        String description = task.getDescription();
+        String category = task.getCategory();
+        boolean finished = task.getFinished();
 
         String status = finished ? "[DONE]" : "[PENDING]";
         String categoryTag;
