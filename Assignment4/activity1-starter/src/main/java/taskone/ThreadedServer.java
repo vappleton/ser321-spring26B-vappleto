@@ -48,10 +48,6 @@ public class ThreadedServer {
                     }
                 });
                 thread.start();
-
-                // Close connection
-                clientSocket.close();
-                System.out.println("Client disconnected");
             }
         } catch (IOException e) {
             System.err.println("Server error: " + e.getMessage());
