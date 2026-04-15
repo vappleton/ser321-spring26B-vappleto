@@ -93,9 +93,9 @@ public class Performer {
                     case LIST:
                        response = handleList(request);
                         break;
-                    //case "finish":
-                        //responseJSON = handleFinish(requestJSON);
-                       // break;
+                    case FINISH:
+                        response = handleFinish(request);
+                        break;
                     //case "quit":
                         //responseJSON = handleQuit();
                        // break;
@@ -200,19 +200,22 @@ public class Performer {
         return responseBuilder.build();
     }
 
-    private JSONObject handleFinish(JSONObject request) {
+    private Response handleFinish(Request request) {
         // Validation intentionally skipped.
 
-        int id = request.getInt("id");
+        int id = request.getId();
         // Mark task as finished
         boolean success = taskList.finishTask(id);
 
         if (success) {
-            JSONObject data = new JSONObject();
-            data.put("message", "Task #" + id + " marked as finished");
-            return JsonUtils.createSuccessResponse("finish", data);
+            return Response.newBuilder()
+                    .setType(Response.ResponseType.SUCCESS)
+                    .setMessage("Task # " + id + " has been finished.").build();
         } else {
-            return JsonUtils.createErrorResponse("finish", "Task not found with ID: " + id);
+            return Response.newBuilder()
+                    .setType(Response.ResponseType.ERROR)
+                    .setMessage("Task not found with ID: " + id)
+                    .build();
         }
     }
 
