@@ -296,19 +296,28 @@ public class Client {
     /**
      * Quit the application.
      */
-    private static void quit() {
+    private static void quit() throws IOException {
         System.out.println("\n--- Quitting ---");
 
         // Create request
-        JSONObject request = new JSONObject();
-        request.put("type", "quit");
+        Request request = Request.newBuilder()
+                .setType(Request.RequestType.QUIT)
+                .build();
 
         // Send request and get response
-        JSONObject response = sendRequest(request);
-        if (response != null && response.getBoolean("ok")) {
-            JSONObject data = response.getJSONObject("data");
-            System.out.println(data.getString("message"));
+        request.writeDelimitedTo(outStream);
+        outStream.flush();
+
+        Response response = Response.parseDelimitedFrom(inStream);
+
+        if (response != null) {
+            if (response.getType() == Response.ResponseType.SUCCESS) {
+                System.out.println(response.getMessage());
+            }else {
+                System.out.println("Error: " + response.getMessage());
+            }
         }
+
     }
 
     /**
