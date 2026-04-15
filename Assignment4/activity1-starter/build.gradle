@@ -72,6 +72,11 @@ task runClient(type: JavaExec) {
         }
     }
 }
+//task to run the multithreaded server
+task runThreadedServer(type: JavaExec) {
+    mainClass = 'taskone.ThreadedServer'
+    classpath = sourceSets.main.runtimeClasspath
+}
 
 // Default application main class
 application {
