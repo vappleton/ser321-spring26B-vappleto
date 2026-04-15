@@ -13,6 +13,10 @@ You will learn about:
 - **Multi-threading** - Handling multiple clients simultaneously
 - **Thread safety** - Protecting shared data from race conditions
 
+## Screencast link:  
+https://youtu.be/HiYyoDkUX6w 
+
+
 ## Starter Code
 
 ### What's Provided
