@@ -35,6 +35,7 @@ public class AuctionServer {
             "Isolde", "Jasper"
     };
     private static Random botNameRandom = new Random();
+    private static final ExecutorService threadPool = Executors.newFixedThreadPool(10);
 
     public static void main(String[] args) {
         int port = DEFAULT_PORT;
@@ -71,13 +72,7 @@ public class AuctionServer {
                     System.out.println("Client " + id + " connected from " +
                             clientSocket.getInetAddress().getHostAddress());
 
-                    Thread thread = new Thread(new Runnable() { //Wrapping the process connection inside a thread
-                        @Override
-                        public void run() {
-                            processConnection(clientSocket, id);
-                        }
-                    });
-                    thread.start();
+                    threadPool.execute(() -> processConnection(clientSocket, id)); //the thread pool
                 } catch (IOException e) {
                     System.err.println("Error accepting client: " + e.getMessage());
                 }
@@ -152,8 +147,6 @@ public class AuctionServer {
                     case LEADERBOARD:
                         response = handleLeaderboard();
                         break;
-
-
 
                     default:
                         response = buildError("Unknown request type");
