@@ -616,6 +616,12 @@ public class AuctionServer {
 
             // Check reserve price (bids > 0 must meet reserve)
             int reservePrice = currentItem.getMinValue() / 2;
+
+            if (gold < reservePrice) {
+                if (bidAmount != -1) {
+                    return "You dont have enough gold to meet the reserver price. Please skip (-1)";
+                }
+            }
             if (bidAmount > 0 && bidAmount < reservePrice) {
                 return "Bid must meet reserve price of " + reservePrice + " gold.";
             }
