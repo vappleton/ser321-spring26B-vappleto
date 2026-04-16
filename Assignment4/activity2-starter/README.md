@@ -9,6 +9,14 @@ You will learn about:
 - **Protocol Buffers** - Efficient binary serialization
 - **Basic synchronization** - Protecting shared data (leaderboard)
 
+## Screencast link: 
+
+## How to compile and run the server and client
+gradle build 
+gradle runServer
+gradle runClient 
+
+
 ## Starter Code
 
 ### What's Provided
@@ -24,6 +32,23 @@ You will learn about:
 9. **PROTO_PROTOCOL.md** - Complete protocol specification
 10. **build.gradle** - Build configuration
 11. **ProtocolTest.java** - 4 starter tests
+
+## What was implemented
+**In AuctionServer.java** 
+[x] handleJoin() - Initializes a new game for the player, creates bots, loads items and sends the first item with player status.
+[x] handleBid() - Processes the player bids,validates input, generates the bot bids, determines the winner, updates the game state and returns the auction results
+[x] handleLeaderboard() - Retrieves the top 10 scores from te leaderboard and returns them in the response. 
+
+**In LeaderBoardManager.java**  
+Made the leaderboard thread-safe by adding "synchronized" to the methods definitions  to ensure safe access accross the multiple client threads. 
+
+**In ProtocolTest.java** 
+Additional tests included are :
+[x] testLeaderboardRequest() - This test verifies leaderboard request ans returns the correct response and structure
+[x] testSkipBidRequest() - Tests the skip functionality using -1 bid to ensure the auction still completes.
+[x] testInvalidBidRequest() - ensures that invalid bids return ERROR and don't advance the game state
+[x] testValidBidRequest() - Confirms that valid bids are accepted and return BID_RESULT with the update state
+[x] testJoinRequest() - verifies hat JOIN initializes the game correctly with player status and first item. 
 
 ### Running the Starter Code
 
@@ -141,3 +166,32 @@ Server: Game over! Final results:
 - Follow the protocol specification exactly
 - Test with multiple concurrent clients
 - Make sure leaderboard persists across server restarts (uses `scores.txt`)
+
+## Design decisions or challenges 
+One of the main design decisions was how to handle the game state for each player. Since each client runs its own thread, I kept
+all game-related data inside a PLayerGameState objct so that each player's game is completely independent. This made it easier 
+to manage things like te items, gold, and bot opponents without having to worry about inteference between threads. 
+
+A challenge I ran into was handling the bot opponents since the BotOpponent class was not meant to be modified. My workaround for this
+was tracking the bots' gold and items separately inside PlayerGameState. This allowed me to correctly calculate final scores for both 
+the player and the bots without changing the given code. 
+
+Another part that took some thought was the BID logic, as there are several steps involved ( validation, bids, determining the winner, updating state),
+so I broke it down into smaller steps to keep it organized and made sure that invalid bids did not advance the game. 
+
+Handling the protocol flow for when the  game is over was also a bit tricky, so I decided to have the main connection handle the transioont to GAME_OVER
+after the final item. 
+
+Finally, I added "synchronized" to the methods in the leaderboad manager to ensure thread-safety. This prevents the race conditions when
+the multiple clients are connected at the same time. 
+
+## Known issues/Limitations 
+One limitation to keep in mind is that the server must be running before executing the protocol tests, as teh tests assume an 
+active connection to the server. 
+
+The server uses a thread pool (ExecutorService) to manage client connections efficiently, which works fine for this assignment but may not be 
+efficiently scalable with a large number of concurrent clients. 
+
+Not a limitation per se, but the leaderboard currently stores all global scores, including multiple entries for the same player if they play multiple games, 
+rather than just keeping the highest score per player. This is assumed to be ok since the requirement states that the leaderboard should return 
+the top 10 scores from global leaderboard. 
