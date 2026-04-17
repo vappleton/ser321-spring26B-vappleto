@@ -14,9 +14,12 @@ You will learn about:
 ## How to compile and run the server and client
 gradle build 
 
-gradle runServer --args="--grading" 
+**Server**
+gradle runServer --args="--grading"
 
-gradle runClient -Phost=18.222.151.192 -Pport=8889
+**Client**
+gradle runClient -Phost=localhost -Pport=8889
+
 
 
 ## Starter Code
@@ -37,8 +40,8 @@ gradle runClient -Phost=18.222.151.192 -Pport=8889
 
 ## What was implemented
 **In AuctionServer.java** 
-[x] handleJoin() - Initializes a new game for the player, creates bots, loads items and sends the first item with player status.
-[x] handleBid() - Processes the player bids,validates input, generates the bot bids, determines the winner, updates the game state and returns the auction results
+[x] handleJoin() - Initializes a new game for the player, creates bots, loads items and sends the first item with player status.  
+[x] handleBid() - Processes the player bids,validates input, generates the bot bids, determines the winner, updates the game state and returns the auction results  
 [x] handleLeaderboard() - Retrieves the top 10 scores from the leaderboard and returns them in the response. 
 
 **In LeaderBoardManager.java**  
