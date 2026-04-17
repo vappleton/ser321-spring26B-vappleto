@@ -41,8 +41,9 @@ gradle runClient
 ## What was implemented
 **In AuctionServer.java**  
 [x] handleJoin() - Initializes a new game for the player, creates bots, loads items and sends the first item with player status.   
-[x] handleBid() - Processes the player bids,validates input, generates the bot bids, determines the winner, updates the game state and returns the auction results.    
-[x] handleLeaderboard() - Retrieves the top 10 scores from the leaderboard and returns them in the response.  
+[x] handleBid() - Processes the player bids,validates input, generates the bot bids, determines the winner of a specific item, updates the game state and returns the auction results.    
+[x] handleLeaderboard() - Retrieves the top 10 scores from the leaderboard and returns them in the response.
+[x] handleGameOver() - Calculates  final scores for the player and the bots, determines the winner for the whole game, updates the global leaderboard and returns complete game results including the items won 
 
 
 **In LeaderBoardManager.java**  
