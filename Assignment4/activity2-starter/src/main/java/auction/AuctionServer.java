@@ -162,6 +162,8 @@ public class AuctionServer {
                         !response.hasNextItem()) {
                         Response gameOver = handleGameOver(gameState);
                         gameOver.writeDelimitedTo(out);
+                        out.flush();
+                        gameState = null;
 
                     }
                 }
