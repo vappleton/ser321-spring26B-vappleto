@@ -14,10 +14,10 @@ You will learn about:
 ## How to compile and run the server and client
 gradle build 
 
-**Server**
+**Server:**  
 gradle runServer --args="--grading"
 
-**Client**
+**Client:**  
 gradle runClient 
 
 
