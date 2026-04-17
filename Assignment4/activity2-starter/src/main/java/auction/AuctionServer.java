@@ -121,6 +121,7 @@ public class AuctionServer {
                         response = handleQuit(gameState);
                         if (response != null) {
                             response.writeDelimitedTo(out);
+                            out.flush();
                         }
                         return; // Exit handler
                     case  JOIN:
@@ -154,12 +155,14 @@ public class AuctionServer {
 
                 if (response != null) {
                     response.writeDelimitedTo(out);
+                    out.flush();
 
                     //if theres no next item, send game over
                     if (response.getType() ==Response.ResponseType.BID_RESULT &&
                         !response.hasNextItem()) {
                         Response gameOver = handleGameOver(gameState);
                         gameOver.writeDelimitedTo(out);
+
                     }
                 }
             }
