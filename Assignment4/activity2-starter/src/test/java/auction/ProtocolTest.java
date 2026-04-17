@@ -251,8 +251,30 @@ public class ProtocolTest {
         assertTrue(response.hasResult(),"Should include auction results");
 
     }
+    @Test
+    @Order(9)
+    public void testLeaderboardRequest() throws IOException { // making sure leaderboard works even if there aren't any scores yet
+        Response.parseDelimitedFrom(in); // welcome
 
+        // Send LEADERBOARD request
+        Request leaderboardRequest = Request.newBuilder()
+                .setType(Request.RequestType.LEADERBOARD)
+                .build();
+        leaderboardRequest.writeDelimitedTo(out);
 
+        Response response = Response.parseDelimitedFrom(in);
+
+        assertNotNull(response);
+        assertEquals(Response.ResponseType.LEADERBOARD_RESPONSE, response.getType(),
+                "Should return LEADERBOARD_RESPONSE");
+        assertTrue(response.getOk(), "Leaderboard request should succeed");
+
+        assertTrue(response.hasLeaderboard(), "Response should contain leaderboard");
+
+        // Entries can be empty, but they shouldn't crash
+        assertNotNull(response.getLeaderboard().getEntriesList(),
+                "Entries list should exist");
+    }
 
     // Helper methods if you want to use them
 
