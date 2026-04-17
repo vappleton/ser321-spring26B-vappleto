@@ -9,15 +9,14 @@ You will learn about:
 - **Protocol Buffers** - Efficient binary serialization
 - **Basic synchronization** - Protecting shared data (leaderboard)
 
-## Screencast link: 
+## Screencast link: https://youtu.be/dhKvQt9C6tk 
 
 ## How to compile and run the server and client
 gradle build 
 
-gradle runServer
 gradle runServer --args="--grading" 
 
-gradle runClient 
+gradle runClient -Phost=18.222.151.192 -Pport=8889
 
 
 ## Starter Code
