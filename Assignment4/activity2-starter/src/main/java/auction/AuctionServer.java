@@ -365,7 +365,7 @@ public class AuctionServer {
                 }
             }
         }
-        //////////////////add to leaderboar////////////////////////////
+        //////////////////add to leaderboard////////////////////////////
         int rank = leaderboard.addScore(gameState.getPlayerName(),playerTotal);
 
         List<PlayerStatus> players = new ArrayList<>();
@@ -384,6 +384,7 @@ public class AuctionServer {
                 .setGoldRemaining(bot1Gold)
                 .setItemsValue(bot1ItemsValue)
                 .setTotalScore(bot1total)
+                .addAllItemsWon(getItemNames(gameState.bot1Items))
                 .build());
 
         //bot2
@@ -392,6 +393,7 @@ public class AuctionServer {
                 .setGoldRemaining(bot2Gold)
                 .setItemsValue(bot2ItemsValue)
                 .setTotalScore(bot2total)
+                .addAllItemsWon(getItemNames(gameState.bot2Items))
                 .build());
 
         //bot3
@@ -400,6 +402,7 @@ public class AuctionServer {
                 .setGoldRemaining(bot3Gold)
                 .setItemsValue(bot3ItemsValue)
                 .setTotalScore(bot3total)
+                .addAllItemsWon(getItemNames(gameState.bot3Items))
                 .build());
 
         //build final response
@@ -416,6 +419,7 @@ public class AuctionServer {
                 .build();
     }
 
+
     //helper method for the bot's inventory value
     private static int getItemsValue(List<Item> items) {
         int total =0;
@@ -423,6 +427,14 @@ public class AuctionServer {
             total += item.getActualValue();
         }
         return total;
+    }
+    //helper method for the bots' list of items won
+    private static List<String> getItemNames(List<Item> items) {
+        List<String> names = new ArrayList<>();
+        for (Item item : items) {
+            names.add(item.getName());
+        }
+        return names;
     }
 
     private static Response handleLeaderboard() {
