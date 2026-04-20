@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+repositories {
+    mavenCentral()
+}
+//Task to run Leader/
+tasks.register('runLeader, JavaExec') {
+    group = "application"
+    descritpion = "runs Leader.java"
+    classpath = SourceSets.main.runtimeClasspath
+    mainClass = 'Leader'
+}
+//Task to run the Workers/
+tasks.register('runWorker, JavaExec') {
+    group = "application"
+    descritpion = "runs Worker.java"
+    classpath = SourceSets.main.runtimeClasspath
+    mainClass = 'Worker'
+}
