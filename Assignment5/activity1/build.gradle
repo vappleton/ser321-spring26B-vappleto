@@ -6,16 +6,19 @@ repositories {
     mavenCentral()
 }
 //Task to run Leader/
-tasks.register('runLeader, JavaExec') {
+tasks.register('runLeader', JavaExec) {
     group = "application"
-    descritpion = "runs Leader.java"
-    classpath = SourceSets.main.runtimeClasspath
+    description = "runs Leader.java"
+    classpath = sourceSets.main.runtimeClasspath
     mainClass = 'Leader'
 }
 //Task to run the Workers/
-tasks.register('runWorker, JavaExec') {
+tasks.register('runWorker', JavaExec) {
     group = "application"
-    descritpion = "runs Worker.java"
-    classpath = SourceSets.main.runtimeClasspath
+    description = "runs Worker.java"
+    classpath = sourceSets.main.runtimeClasspath
     mainClass = 'Worker'
+}
+tasks.withType(JavaExec) {
+    standardInput = System.in
 }
