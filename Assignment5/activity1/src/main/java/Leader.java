@@ -64,7 +64,11 @@ public class Leader {
         //rounds
         int round = 1;
         while (true) {
-            System.out.println("Please enter an arithmetic task: \n");
+            if (round == 1) {
+                System.out.println("Please enter an arithmetic task:");
+            } else {
+                System.out.println("\nPlease enter an arithmetic task (or 'quit'):");
+            }
             String input = scanner.nextLine();
 
             if (input.equals("quit")) {
@@ -148,7 +152,7 @@ public class Leader {
                     consensus = Collections.min(candidates);
                 }
 
-                System.out.println("Consensus: " + consensus + " " + max_votes + "/" + total);
+                System.out.println("Consensus: " + consensus + " (" + max_votes + "/" + total + "workers agreed)");
                 System.out.println("Announcing consensus to all workers...");
 
 
