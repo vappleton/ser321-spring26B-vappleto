@@ -21,7 +21,7 @@ public class Leader {
 
         System.out.println("Leader starting on port " + port + "\n");
 
-        System.out.print("Waiting for workers to connect... (need at least 3)");
+        System.out.println("Waiting for workers to connect... (need at least 3)");
 
         //accept workers in separate threads
 
@@ -51,20 +51,20 @@ public class Leader {
             }
         }).start();
 
-        while (true) { //wait for at least 3 workes
+        while (true) { //wait for at least 3 workers but no more than 5 (following the given sample output)
 
             synchronized (workers) {
-                if (workers.size() >= 3) break;
-                Thread.sleep(1000);
+                if (workers.size() >= 5) break;
             }
+            Thread.sleep(1000);
         }
-        System.out.println("All" + workers.size() + " workers connected. Starting consensus rounds...");
+        System.out.println("All " + workers.size() + " workers connected. Starting consensus rounds...");
 
         Scanner scanner = new Scanner(System.in);
         //rounds
         int round = 1;
         while (true) {
-            System.out.print("Please enter an arithmetic task: \n");
+            System.out.println("Please enter an arithmetic task: \n");
             String input = scanner.nextLine();
 
             if (input.equals("quit")) {
@@ -91,7 +91,7 @@ public class Leader {
                 for (Socket s : workers) {
                     new Thread(() -> {
                         try {
-                            s.setSoTimeout(5000); //tmeout
+                            s.setSoTimeout(15000); //tmeout
 
                             String response = inputs.get(s).readLine();
 
@@ -105,7 +105,7 @@ public class Leader {
                             }
 
                         } catch (Exception e) {
-                            System.out.println("Worker + " + workerNames.get(s) + "timed out or failed.");
+                            System.out.println("Worker + " + workerNames.get(s) + " timed out or failed.");
                         }
                     }).start();
 
@@ -113,7 +113,7 @@ public class Leader {
             }
 
             //Now waiting for responses
-            Thread.sleep(5000);
+            Thread.sleep(15000);
 
             int total =0;
             for (int count : votes.values()) {
