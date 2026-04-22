@@ -7,7 +7,7 @@ public class Worker {
     public static void main(String[] args) throws IOException {
 
         if (args.length < 3) {
-            System.out.println("Please enter command in this format: Worker <name> <host> <port>");
+            System.out.println("Please enter command in this format: gardle runWorker --args=<name> <host> <port>");
             return;
         }
 
@@ -41,7 +41,7 @@ public class Worker {
                 }
                 //task was received
                 if (message.startsWith("TASK")) {
-                    String task = message.substring(5); //remove "TASK"
+                    String task = message.substring(5); //rebuild "TASK"
                     System.out.println("Task received: " + task);
 
                     System.out.println("> Enter your result: ");
