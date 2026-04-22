@@ -23,8 +23,7 @@ public class Leader {
 
         System.out.println("Waiting for workers to connect... (need at least 3)");
 
-        //accept workers in separate threads
-
+        //accept workers in separate threads (handles incomming connections)
         new Thread(() -> {
             while (true) {
                 try {
@@ -43,7 +42,7 @@ public class Leader {
                         workerNames.put(workerSocket, workerName);
                     }
                     System.out.println(workerName + " connected: from " + workerSocket.getInetAddress().getHostName()
-                    + ":" + workerSocket.getPort());
+                            + ":" + workerSocket.getPort());
 
                 } catch (IOException e) {
                     System.out.println("Error accepting worker");
@@ -54,10 +53,26 @@ public class Leader {
         while (true) { //wait for at least 3 workers but no more than 5 (following the given sample output)
 
             synchronized (workers) {
+                if (workers.size() >= 3) break;
+            }
+            Thread.sleep(200);
+        }
+        //start the timer to work for up to 5 workers within time limit or timeout
+        long waitStart = System.currentTimeMillis();
+        long waitLimit = 5000; // 5 seconds
+
+        while (true) {
+            synchronized (workers) {
                 if (workers.size() >= 5) break;
             }
-            Thread.sleep(1000);
+
+            if (System.currentTimeMillis() - waitStart >= waitLimit) break;
+
+            Thread.sleep(200);
         }
+
+        Thread.sleep(5000); // small buffer
+
         System.out.println("All " + workers.size() + " workers connected. Starting consensus rounds...");
 
         Scanner scanner = new Scanner(System.in);
@@ -71,7 +86,7 @@ public class Leader {
             }
             String input = scanner.nextLine();
 
-            if (input.equals("quit")) {
+            if (input.equalsIgnoreCase("quit")) {
                 System.out.println("Goodbye!");
                 break;
             }
@@ -81,45 +96,52 @@ public class Leader {
 
             //now sending the task to all the workrs
 
+            List<Socket> activeWorkers;
             synchronized (workers) {
-                for (Socket s : workers) {
-                    outputs.get(s).println(task);
-                }
+                activeWorkers = new ArrayList<>(workers);
             }
-
+            //send the task
+            for (Socket s : activeWorkers) {
+                outputs.get(s).println(task);
+            }
             Map<Integer, Integer> votes = new HashMap<>();
 
-            //receiving results (each worker handlded in its own thread)
+            //create a listener
+            WorkerListener listener = new WorkerListener(activeWorkers.size());
 
-            synchronized (workers) {
-                for (Socket s : workers) {
-                    new Thread(() -> {
-                        try {
-                            s.setSoTimeout(15000); //tmeout
+            //collect responses concurrently
+            for (Socket s : activeWorkers) {
+                new Thread(() -> {
+                    try {
+                        s.setSoTimeout(15000); //tmeout
 
-                            String response = inputs.get(s).readLine();
+                        String response = inputs.get(s).readLine();
 
-                            if (response != null && response.startsWith("RESULT")) {
-                                int value = Integer.parseInt(response.split(" ")[1]);
+                        if (response == null) {
+                            System.out.println("Worker " + workerNames.get(s) + " was disconnected.");
 
-                                synchronized (votes) {
-                                    votes.put(value, votes.getOrDefault(value, 0) + 1);
-                                }
-                                System.out.println("Received from " + workerNames.get(s) + ": " + value);
+                        } else if (response.startsWith("RESULT")) {
+                            int value = Integer.parseInt(response.split(" ")[1]);
+
+                            synchronized (votes) {
+                                votes.put(value, votes.getOrDefault(value, 0) + 1);
                             }
-
-                        } catch (Exception e) {
-                            System.out.println("Worker + " + workerNames.get(s) + " timed out or failed.");
+                            System.out.println("Received from " + workerNames.get(s) + ": " + value);
                         }
-                    }).start();
 
-                }
+                    } catch (Exception e) {
+                        System.out.println("Worker " + workerNames.get(s) + " disconnected or failed.");
+                    }
+                    listener.workerDone();
+                }).start();
+
             }
 
             //Now waiting for responses
-            Thread.sleep(15000);
+            listener.waitForAll(15000);
 
-            int total =0;
+            //process results
+            int total = 0;
             for (int count : votes.values()) {
                 total += count;
             }
@@ -127,43 +149,37 @@ public class Leader {
                 System.out.println("No responses received.");
                 continue;
             }
-            int max_votes =0;
+            int max_votes = 0;
             for (int count : votes.values()) {
                 if (count > max_votes) {
                     max_votes = count;
                 }
             }
-            if(max_votes >= Math.ceil(total *0.5)) {
-                //finding the candidate wuth max votes
 
-                List<Integer> candidates = new ArrayList<>();
-                for (Map.Entry<Integer, Integer> entry : votes.entrySet()) {
-                    if (entry.getValue() == max_votes) {
-                        candidates.add(entry.getKey());
-                    }
+            List<Integer> candidates = new ArrayList<>();
+            for (Map.Entry<Integer, Integer> entry : votes.entrySet()) {
+                if (entry.getValue() == max_votes) {
+                    candidates.add(entry.getKey());
                 }
+            }
 
-                int consensus;
+            if (candidates.size() == 1)  {
 
-                if (candidates.size() == 1) {
-                    consensus = candidates.get(0);
-                } else {
-                    //tie-breaking: choose the smallest value
-                    consensus = Collections.min(candidates);
-                }
+                int consensus = candidates.get(0);
 
-                System.out.println("Consensus: " + consensus + " (" + max_votes + "/" + total + "workers agreed)");
+
+                System.out.println("Consensus: " + consensus + " (" + max_votes + "/" + total + " workers agreed)");
                 System.out.println("Announcing consensus to all workers...");
 
 
             } else {
-                System.out.println("No consensus reached. Votes: " + votes);
+                System.out.println("There's a tie! No consensus was reached. Votes: " + votes);
             }
             round++;
 
         }
-        System.out.println("Leader shutting down.");
 
+        System.out.println("Leader shutting down.");
     }
 
 
