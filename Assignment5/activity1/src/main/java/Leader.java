@@ -1,3 +1,17 @@
+/**
+ * Leader class that coordinates a distributed consensus system using a hierarchical Leader-Worker model
+ * The leader:
+ * -Accepts connections from multiple workers
+ * -Sends arithmetic tasks to all connected workers
+ * -Collects results concurrently using threads
+ * -Uses majority voting to determine consensus
+ * -Handles worker failures and timeouts
+ *
+ * The system requires a minimum of 3 workers and allows up to 5 workers to participate in each consensus round.
+ *
+ * Consensus is based on agreement and not correctness. The Leader does not verify the result, so incorrect consensus is possible if
+ * the majority of the workers provide the same incorrect value.
+ */
 
 import java.io.*;
 import java.net.*;
@@ -71,7 +85,7 @@ public class Leader {
             Thread.sleep(200);
         }
 
-        Thread.sleep(5000); // small buffer
+        Thread.sleep(10000); // small buffer
 
         System.out.println("All " + workers.size() + " workers connected. Starting consensus rounds...");
 
@@ -170,6 +184,12 @@ public class Leader {
 
                 System.out.println("Consensus: " + consensus + " (" + max_votes + "/" + total + " workers agreed)");
                 System.out.println("Announcing consensus to all workers...");
+
+                String message = "CONSENSUS " + consensus + " " + max_votes + "/" + total;
+
+                for (Socket s : workers) {
+                    outputs.get(s).println(message);
+                }
 
 
             } else {
