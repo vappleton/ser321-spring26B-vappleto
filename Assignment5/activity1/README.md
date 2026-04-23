@@ -6,6 +6,10 @@ gradle runLeader --args="9000"
 gradle runWorker --args="Worker1 localhost 9000"  
 **Note:** The Leader needs a minimum of 3 workers to begin execution
 
+## Screencast link
+
+https://youtu.be/7QvUNMRZMkc 
+
 ## Protocol Description
 This system implements a simple distributed consensus protocol using a hierarchical Leader-Worker model. 
 
