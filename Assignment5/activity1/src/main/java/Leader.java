@@ -106,7 +106,7 @@ public class Leader {
                 System.out.println("Invalid task format. Use something like 2+2 or 10 - 3");
                 continue;
             }
-            //quit logic
+            //quit
             if (input.equalsIgnoreCase("quit")) {
                 System.out.println("Goodbye!");
 
@@ -139,16 +139,7 @@ public class Leader {
                 synchronized (workers) {
                     activeWorkers = new ArrayList<>(workers);
                 }
-                //clear stale repsonses
-                for (Socket s : activeWorkers) {
-                    try {
-                        BufferedReader in = inputs.get(s);
-                        while (in !=null && in.ready()) {
-                            in.readLine();
-                        }
-                    } catch (IOException ignored) {}
 
-                }
                 //send the task
                 for (Socket s : activeWorkers) {
                     PrintWriter out = outputs.get(s);
@@ -230,11 +221,7 @@ public class Leader {
                         break;
                     }
                 }
-                if (total < 3) { //dont allow consensus with too few workers
-                    System.out.println("Not enough responses to determine consensus. Votes: " + votes);
-                    round++;
-                    break;
-                }
+
                 int max_votes = 0;
                 for (int count : votes.values()) {
                     if (count > max_votes) {
@@ -276,11 +263,30 @@ public class Leader {
                         System.out.println("There's a tie!. Votes: " + votes + " Retrying the same task...");
                     } else {
                         System.out.println("The tie persisted. No consensus was reached. Moving to next task.");
+
+                        String message = "ERR-CONS Tie persisted";
+
+                        for (Socket s : activeWorkers) {
+                            PrintWriter out = outputs.get(s);
+                            if (out != null) {
+                                out.println(message);
+                            }
+                        }
+
                         round++;
                         break;
                     }
                 } else {
                     System.out.println("No consensus reached. Votes: " + votes);
+                    String message = "ERR-CONS No consensus";
+
+                    for (Socket s : activeWorkers) {
+                        PrintWriter out = outputs.get(s);
+                        if (out != null) {
+                            out.println(message);
+                        }
+                    }
+
                     round++;
                     break;
 
