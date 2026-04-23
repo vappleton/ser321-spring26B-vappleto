@@ -63,18 +63,19 @@ public class Worker {
 
                     while (true) {
 
-                        System.out.println("> Enter your result: ");
-
                         if (in.ready()) { // check if Leader sent something new while waiting
                             String newMessage = in.readLine();
 
-                            if (newMessage == null) {
+                            if (newMessage == null || newMessage.equals("QUIT")) {
                                 System.out.println("Leader disconnected. Shutting down.");
                                 return;
                             }
                             message = newMessage;
                             break; // exit input loop and process the new message
                         }
+
+                        System.out.println("> Enter your result: ");
+
                         if (!scanner.hasNextLine()) {
                             System.out.println("Input closed.");
                             return;
@@ -90,29 +91,6 @@ public class Worker {
 
                     } // if interrupted, process the new message immediately
                     if (!message.startsWith("TASK")) {
-
-                        if (message.equals("QUIT")) {
-                            System.out.println("Leader disconnected. Shutting down.");
-                            break;
-                        } else if (message.startsWith("CONSENSUS")) { //consesus received
-
-                            String[] parts = message.split(" ");
-
-                            int consensus = Integer.parseInt(parts[1]);
-
-                            String ratio = parts[2];
-
-                            System.out.println("Consensus announced: " + consensus + " (" + ratio + " workers agreed)");
-
-                            if (consensus == lastVote) {
-                                System.out.println("You voted with the majority!\n");
-                            } else {
-                                System.out.println("Your answer differed from the consensus.\n");
-                            }
-
-                            System.out.println("Waiting for next task...\n");
-                            continue;
-                        }
                         continue;
                     }
 
@@ -135,7 +113,7 @@ public class Worker {
 
                     System.out.println("Consensus announced: " + consensus + " (" + ratio + " workers agreed)");
 
-                    if (consensus == lastVote) {
+                    if (lastVote != Integer.MIN_VALUE && consensus == lastVote) {
                         System.out.println("You voted with the majority!\n");
                     } else {
                         System.out.println("Your answer differed from the consensus.\n");
@@ -144,9 +122,9 @@ public class Worker {
                     System.out.println("Waiting for next task...\n");
                 }
 
-                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ERROR CONSENSUS~~~~~~~~~~~~~~~~~~~~~~~//
+                // ~~~~~~~~~~~~~~~~~~~~ERR-CONS~~~~~~~~~~~~~~~~//
                 else if (message.startsWith("ERR-CONS")) {
-                    System.out.println("Consensus failed: " + message);
+                    System.out.println("Consensus could not be reached: ");
                     System.out.println("Waiting for next task...\n");
                 }
             }
