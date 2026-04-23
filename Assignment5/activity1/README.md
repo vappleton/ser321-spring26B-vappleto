@@ -14,27 +14,24 @@ The Workers do not communicate with each other.
 
 Each consensus round follows this sequence:
 
-1. The Leader broadcast an arithmetic task to all active workers using:  
-'TASK < expression>'  
+1. The Leader broadcasts an arithmetic task to all active workers using: TASK < expression>  
 
-2. Each worker receives the task, prompts the user for a result and sends the result back using:   
-'RESULT < value>'  
+2. Each worker receives the task, prompts the user for a result and sends the result back using: RESULT < value>
 
 3. The Leader collects responses concurrently using threads and applies a majority voting to determine consensus.
 4. The Leader then broadcast the final decision:  
-'CONSENSUS <value> <agreement_ratio>'  
-or 'ERR-CONS <reason>' if no consensus is reached. 
+CONSENSUS < value> < agreement_ratio> or if no consensus is reached, the Leader prints a message and proceeds to the next round. The workers also reflect when a consensus could not be reached. 
 
 ## Consensus Algorithm Design
 The system uses a majority voting algorithm to determine consensus among worker responses. Each worker independently
-submits a result to the Leader. The Leader spawns a separate thread per worker to collect responses concurrently. 
-A helper class called WorkerListener synchronizes these threads and ensures the leader waits until all workers respond or a timeout is reached.  
+submits a result to the Leader.  
+The Leader spawns a separate thread per worker to collect responses concurrently. A helper class called WorkerListener synchronizes these threads and ensures the leader waits until all workers respond or a timeout is reached.  
 
 This approach improves accuracy and efficiently by ensuring the Leader proceeds as soon as all the responses are available, while
 still handling delayed or failed workers gracefully.  
 
 ## Decision Rules  
-- A strict majority (> 50%) is required to reach consensus.
+- A strict majority (greater than 50%) is required to reach consensus.
 - The value with the highest number of votes is elected. 
 
 There are three possible outcomes:
@@ -48,18 +45,19 @@ A value has the most votes but does not meet the majority threshold.
 ## Worker Failures  
 The system handles worker failures gracefully:  
 **If a worker disconnects:**  
--The Leader detects it via socket failure or null repsonse. 
--The worker is removed from the active worker list.
--The Leader continues with the remaining workers
+- The Leader detects it via socket failure or null repsonse. 
+- The worker is removed from the active worker list.
+- The Leader continues with the remaining workers
 
 **If a worker does not respond in time**  
--The Leader proceeds reports no responses and moves on to the next task
+- The Leader proceeds after a timeout. 
+- If no sufficient repsonses are received, it retries or moves on to the next task.
 
 
 ## Tie Handling  
 **If there's a tie:**  
-- The Leader  retries the same task once.
-**If the tie persist**  
+- The Leader  retries the same task once.  
+**If the tie persists:**  
 - The Leader reports no consensus
 - The system moves to the next task. 
 
