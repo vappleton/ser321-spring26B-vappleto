@@ -19,6 +19,8 @@ public class Client {
   private final JokeGrpc.JokeBlockingStub blockingStub2;
   private final RegistryGrpc.RegistryBlockingStub blockingStub3;
   private final RegistryGrpc.RegistryBlockingStub blockingStub4;
+  private final ConverterGrpc.ConverterBlockingStub converterStub; //converter stub
+  private  final LibraryGrpc.LibraryBlockingStub libraryStub; //library stub
 
   /** Construct client for accessing server using the existing channel. */
   public Client(Channel channel, Channel regChannel) {
@@ -32,6 +34,8 @@ public class Client {
     blockingStub2 = JokeGrpc.newBlockingStub(channel);
     blockingStub3 = RegistryGrpc.newBlockingStub(regChannel);
     blockingStub4 = RegistryGrpc.newBlockingStub(channel);
+    converterStub = ConverterGrpc.newBlockingStub(channel);
+    libraryStub = LibraryGrpc.newBlockingStub(channel);
   }
 
   /** Construct client for accessing server using the existing channel. */
@@ -46,6 +50,8 @@ public class Client {
     blockingStub2 = JokeGrpc.newBlockingStub(channel);
     blockingStub3 = null;
     blockingStub4 = null;
+    converterStub = ConverterGrpc.newBlockingStub(channel);
+    libraryStub = LibraryGrpc.newBlockingStub(channel);
   }
 
   public void askServerToParrot(String message) {
@@ -206,48 +212,74 @@ public class Client {
       Client client = new Client(channel, regChannel);
 
       // call the parrot service on the server
-      client.askServerToParrot(message);
+      //client.askServerToParrot(message);
 
       // ask the user for input how many jokes the user wants
       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
+        System.out.println("Services on the connected node. (without registry)");
+        client.getNodeServices(); // get all registered services
+
+
+        while (true) {
+          System.out.println("\nChoose a service:");
+          System.out.println("1. Converter");
+          System.out.println("2. Library");
+          System.out.println("3. Exit");
+
+          String choice = reader.readLine();
+
+          switch (choice) {
+              case "1":
+                  handleConverter(client, reader);
+                  break;
+              case "2":
+                  handleLibrary(client, reader);
+                  break;
+              case "3":
+                  return;
+              default:
+                  System.out.println("Invalid option");
+          }
+      }
+
+      /// ///////////NOT USING JOKE OR ECHO//////////////////////////////////////
+
       // Reading data using readLine
-      System.out.println("How many jokes would you like?"); // NO ERROR handling of wrong input here.
-      String num = reader.readLine();
+      //System.out.println("How many jokes would you like?"); // NO ERROR handling of wrong input here.
+      //String num = reader.readLine();
 
       // calling the joked service from the server with num from user input
-      client.askForJokes(Integer.valueOf(num));
+      //client.askForJokes(Integer.valueOf(num));
 
       // adding a joke to the server
-      client.setJoke("I made a pencil with two erasers. It was pointless.");
+      //client.setJoke("I made a pencil with two erasers. It was pointless.");
 
       // showing 6 joked
-      client.askForJokes(Integer.valueOf(6));
+      //client.askForJokes(Integer.valueOf(6));
 
       // list all the services that are implemented on the node that this client is connected to
 
-      System.out.println("Services on the connected node. (without registry)");
-      client.getNodeServices(); // get all registered services 
 
       // ############### Contacting the registry just so you see how it can be done
 
-      if (args[5].equals("true")) { 
+      //if (args[5].equals("true")) {
         // Comment these last Service calls while in Activity 1 Task 1, they are not needed and wil throw issues without the Registry running
         // get thread's services
-        client.getServices(); // get all registered services 
+        //client.getServices(); // get all registered services
 
         // get parrot
-        client.findServer("services.Echo/parrot"); // get ONE server that provides the parrot service
+        //client.findServer("services.Echo/parrot"); // get ONE server that provides the parrot service
         
         // get all setJoke
-        client.findServers("services.Joke/setJoke"); // get ALL servers that provide the setJoke service
+        //client.findServers("services.Joke/setJoke"); // get ALL servers that provide the setJoke service
 
         // get getJoke
-        client.findServer("services.Joke/getJoke"); // get ALL servers that provide the getJoke service
+        //client.findServer("services.Joke/getJoke"); // get ALL servers that provide the getJoke service
 
         // does not exist
-        client.findServer("random"); // shows the output if the server does not find a given service
-      }
+        //client.findServer("random"); // shows the output if the server does not find a given service
+      //}
 
     } finally {
       // ManagedChannels use resources like threads and TCP connections. To prevent
@@ -261,4 +293,184 @@ public class Client {
       }
     }
   }
+    private static void handleConverter(Client client, BufferedReader reader) throws Exception {
+
+        System.out.println("What do you want to convert?");
+        System.out.println("1. Length");
+        System.out.println("2. Weight");
+        System.out.println("3. Temperature");
+
+        String type = reader.readLine();
+
+        switch (type) {
+            case "1":
+                System.out.println("Length units: KILOMETER, MILE, YARD, FOOT");
+                break;
+            case "2":
+                System.out.println("Weight units: KILOGRAM, POUND");
+                break;
+            case "3":
+                System.out.println("Temperature units: CELSIUS, FAHRENHEIT");
+                break;
+            default:
+                System.out.println("Invalid option");
+                return;
+        }
+
+
+        System.out.println("Enter value: ");
+        double value;
+        try {
+            value = Double.parseDouble(reader.readLine());
+        } catch (Exception e) {
+            System.out.println("Invalid number");
+            return;
+        }
+
+
+        System.out.println("From unit: ");
+        String fromUnit = reader.readLine();
+
+        System.out.println("To unit: ");
+        String toUnit = reader.readLine();
+
+        ConversionRequest request = ConversionRequest.newBuilder()
+                .setValue(value)
+                .setFromUnit(fromUnit)
+                .setToUnit(toUnit)
+                .build();
+
+        ConversionResponse response = client.converterStub.convert(request);
+
+        if(response.getIsSuccess()) {
+            System.out.println("Result: " + response.getResult());
+        } else {
+            System.out.println("Error: " + response.getError());
+        }
+
+
+    }
+
+    private static void handleLibrary(Client client, BufferedReader reader) throws Exception {
+      System.out.println("Library options:");
+      System.out.println("1. List books");
+      System.out.println("2. Search books");
+      System.out.println("3. Borrow book");
+      System.out.println("4. Return book");
+
+      String choice = reader.readLine();
+
+      switch (choice) {
+          case "1":
+              BookListResponse response = client.libraryStub.listBooks(Empty.newBuilder().build());
+
+              if (response.getIsSuccess()) {
+                  for (Book book : response.getBooksList()) {
+                      System.out.println(book.getTitle() + " written by " + book.getAuthor() +
+                              (book.getIsBorrowed() ? "(Borrowed by " + book.getBorrowedBy() + ")" : ""));
+                  }
+              } else {
+                  System.out.println(response.getError());
+              }
+              break;
+
+          case "2":
+              System.out.println("Enter title or author: ");
+              String query = reader.readLine();
+              BookSearchRequest request = BookSearchRequest.newBuilder()
+                      .setQuery(query)
+                      .build();
+
+              BookListResponse resp = client.libraryStub.searchBooks(request);
+
+              if (resp.getIsSuccess()) {
+                  for (Book book : resp.getBooksList()) {
+                      System.out.println(book.getTitle() + " written by " + book.getAuthor());
+                  }
+              } else {
+                  System.out.println(resp.getError());
+              }
+              break;
+
+          case "3":
+              BookListResponse borrowResp = client.libraryStub.listBooks(Empty.newBuilder().build());
+
+              if (borrowResp.getIsSuccess()) {
+                  for (Book b : borrowResp.getBooksList()) {
+                      System.out.println(
+                              b.getTitle() + " by " + b.getAuthor() +
+                                      " | ISBN: " + b.getIsbn()
+                      );
+                  }
+              }
+              System.out.println("Enter ISBN: ");
+              String isbn = reader.readLine();
+
+              if (isbn.isEmpty()) {
+                  System.out.println("ISBN cannot be empty");
+                  return;
+              }
+
+              System.out.println("Enter your name: ");
+              String name = reader.readLine();
+
+              BorrowRequest req = BorrowRequest.newBuilder()
+                      .setIsbn(isbn)
+                      .setBorrowerName(name)
+                      .build();
+
+              BorrowResponse res = client.libraryStub.borrowBook(req);
+              if (res.getIsSuccess()) {
+                  System.out.println(res.getMessage());
+              } else {
+                  System.out.println(res.getError());
+              }
+              break;
+
+          case "4":
+              BookListResponse borrowedList = client.libraryStub.listBooks(Empty.newBuilder().build());
+              boolean foundBorrowed = false;
+
+              if (borrowedList.getIsSuccess()) {
+                  for (Book book : borrowedList.getBooksList()) {
+                      if (book.getIsBorrowed()) {
+                          foundBorrowed = true;
+
+                          System.out.println(
+                                  book.getTitle() + " by " + book.getAuthor() +
+                                          " | ISBN: " + book.getIsbn() +
+                                          " | Borrowed by: " + book.getBorrowedBy()
+                          );
+                      }
+                      if (!foundBorrowed) {
+                          System.out.println("No books are currently borrowed.");
+                          return;
+                      }
+                  }
+              }
+              System.out.println("Enter ISBN: ");
+                 String isbnReturn = reader.readLine();
+              if (isbnReturn.isEmpty()) {
+                  System.out.println("ISBN cannot be empty");
+                  return;
+              }
+
+              ReturnRequest retRequest = ReturnRequest.newBuilder()
+                      .setIsbn(isbnReturn)
+                      .build();
+
+              ReturnResponse retResp = client.libraryStub.returnBook(retRequest);
+
+              if (retResp.getIsSuccess()) {
+                  System.out.println(retResp.getMessage());
+              } else {
+                  System.out.println(retResp.getError());
+              }
+              break;
+          default:
+              System.out.println("Invalid option");
+
+      }
+
+    }
 }
