@@ -39,6 +39,7 @@ public class Node {
         .addService(new JokeImpl())
         .addService(new RegistryAnswerImpl(services))
         .addService(new ConverterImpl())
+        .addService(new LibraryImpl())
         .build().start();
 
     for (var service : server.getServices()) {
