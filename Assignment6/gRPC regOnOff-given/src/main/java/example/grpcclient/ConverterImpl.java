@@ -14,21 +14,27 @@ public class ConverterImpl extends ConverterGrpc.ConverterImplBase {
 
         //validate inputs
         if (from == null || from.isEmpty()) {
-            responseObserver.onNext(error("from_unit can't be empty"));
+            responseObserver.onNext(error("from_unit is required"));
             responseObserver.onCompleted();
             return;
 
         }
         if (to == null || to.isEmpty()) {
-            responseObserver.onNext(error("to_unit can't be empty"));
+            responseObserver.onNext(error("to_unit is required"));
             responseObserver.onCompleted();
             return;
         }
         if (from.equals(to)) {
-            responseObserver.onNext(error("Same unit. Nothing to convert"));
+            responseObserver.onNext(error("same unit - no conversion needed"));
             responseObserver.onCompleted();
             return;
         }
+        if (Double.isNaN(value)) {
+            responseObserver.onNext(error("value is required"));
+            responseObserver.onCompleted();
+            return;
+        }
+
         //in case user enters units in  lowercase
         from = from.toUpperCase();
         to = to.toUpperCase();
@@ -37,8 +43,9 @@ public class ConverterImpl extends ConverterGrpc.ConverterImplBase {
         if ((isLength(from) && !isLength(to)) ||
                 (isWeight(from) && !isWeight(to)) ||
                 (isTemperature(from) && !isTemperature(to))) {
-            responseObserver.onNext(error("Units don't match! Can't convert from " + from + " to " + to));
+            responseObserver.onNext(error("units do not match - cannot convert " + from + " to "  + to));
             responseObserver.onCompleted();
+            return;
         }
 
         try {
@@ -52,7 +59,7 @@ public class ConverterImpl extends ConverterGrpc.ConverterImplBase {
             } else if (isTemperature(from)) {
                 result = convertTemperature(value, from, to);
             } else {
-                responseObserver.onNext(error("Invalid unit: " + from));
+                responseObserver.onNext(error("unsupported unit: " + from));
                 responseObserver.onCompleted();
                 return;
             }
@@ -65,7 +72,7 @@ public class ConverterImpl extends ConverterGrpc.ConverterImplBase {
         } catch (Exception e) {
             responseObserver.onNext(error(e.getMessage()));
         }
-        
+
         responseObserver.onCompleted();
     }
 
@@ -83,10 +90,10 @@ public class ConverterImpl extends ConverterGrpc.ConverterImplBase {
     private double convertTemperature(double value, String from, String to) {
         //Absolute zero check
         if (from.equals("CELSIUS") && value < -273.15) {
-            throw new IllegalArgumentException("Temperature is below absolute zero");
+            throw new IllegalArgumentException("Temperature below absolute zero (−273.15°C)");
         }
         if (from.equals("FAHRENHEIT") && value < -459.67) {
-            throw new IllegalArgumentException("Temperature is below absolute zero");
+            throw new IllegalArgumentException("Temperature is below absolute zero (−459.67°F)");
         }
         if (from.equals("CELSIUS") && to.equals("FAHRENHEIT")) {
             return (value * 9/5) +32;
@@ -103,7 +110,7 @@ public class ConverterImpl extends ConverterGrpc.ConverterImplBase {
             case "MILE" : return value * 1609.34;
             case "YARD" : return value * 0.9144;
             case "FOOT" : return value * 0.3048;
-            default : throw new IllegalArgumentException("Unsupported unit: " + unit);
+            default : throw new IllegalArgumentException("unsupported unit: " + unit);
         }
     }
     private double lengthFromMeters(double meters, String unit) {
@@ -112,7 +119,7 @@ public class ConverterImpl extends ConverterGrpc.ConverterImplBase {
             case "MILE": return meters / 1609.34;
             case "YARD": return meters / 0.9144;
             case "FOOT": return meters / 0.3048;
-            default : throw new IllegalArgumentException("Unsupported unit: " + unit);
+            default : throw new IllegalArgumentException("unsupported unit: " + unit);
         }
     }
 
