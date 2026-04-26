@@ -39,6 +39,7 @@ public class ServerTest {
     ManagedChannel channel;
     private EchoGrpc.EchoBlockingStub blockingStub;
     private JokeGrpc.JokeBlockingStub blockingStub2;
+    private ConverterGrpc.ConverterBlockingStub converterStub;
 
 
     @org.junit.Before
@@ -48,6 +49,7 @@ public class ServerTest {
 
         blockingStub = EchoGrpc.newBlockingStub(channel);
         blockingStub2 = JokeGrpc.newBlockingStub(channel);
+        converterStub = ConverterGrpc.newBlockingStub(channel);
     }
 
     @org.junit.After
@@ -127,5 +129,121 @@ public class ServerTest {
         assertEquals(1, response.getJokeCount());
         assertEquals("whoop", response.getJoke(0));
     }
+    //testing length conversion happy path
+    @Test
+    public void testConvertKmtoMile() {
+        ConversionRequest req = ConversionRequest.newBuilder()
+                .setValue(1)
+                .setFromUnit("KILOMETER")
+                .setToUnit("MILE")
+                .build();
+
+        ConversionResponse res = converterStub.convert(req);
+
+        assertTrue(res.getIsSuccess());
+        assertEquals(0.62, res.getResult(), 0.01);
+    }
+
+    //test temperature conversion happy path
+    @Test
+    public void testConvertCelsiusToFahrenheit() {
+        ConversionRequest req = ConversionRequest.newBuilder()
+                .setValue(0)
+                .setFromUnit("CELSIUS")
+                .setToUnit("FAHRENHEIT")
+                .build();
+
+        ConversionResponse res = converterStub.convert(req);
+
+        assertTrue(res.getIsSuccess());
+        assertEquals(32.0, res.getResult(), 0.01);
+    }
+    //testing weight converison happy path
+    @Test
+    public void testConvertKgtoPound() {
+        ConversionRequest req = ConversionRequest.newBuilder()
+                .setValue(1)
+                .setFromUnit("KILOGRAM")
+                .setToUnit("POUND")
+                .build();
+
+        ConversionResponse res = converterStub.convert(req);
+
+        assertTrue(res.getIsSuccess());
+        assertEquals(2.20, res.getResult(), 0.01);
+
+    }
+    //error cases:
+    //Missing from_unit
+    @Test
+    public void TestMissingFromUnit() {
+        ConversionRequest req = ConversionRequest.newBuilder()
+                .setValue(10)
+                .setFromUnit("")
+                .setToUnit("MILE")
+                .build();
+
+        ConversionResponse res = converterStub.convert(req);
+
+        assertFalse(res.getIsSuccess());
+        assertEquals("from_unit is required", res.getError());
+
+    }
+    //testing mismatched units
+    @Test
+    public void testMismatchedUnits() {
+        ConversionRequest req = ConversionRequest.newBuilder()
+                .setValue(10)
+                .setFromUnit("KILOGRAM")
+                .setToUnit("MILE")
+                .build();
+
+        ConversionResponse res = converterStub.convert(req);
+
+        assertFalse(res.getIsSuccess());
+    }
+    //testing absolute zero vioaltion
+
+    @Test
+    public void testBelowAbsoluteZero() {
+        ConversionRequest req = ConversionRequest.newBuilder()
+                .setValue(-300)
+                .setFromUnit("CELSIUS")
+                .setToUnit("FAHRENHEIT")
+                .build();
+
+        ConversionResponse res = converterStub.convert(req);
+
+        assertFalse(res.getIsSuccess());
+    }
+    //testing unsupported unit
+    @Test
+    public void testUnsupportedUnit() {
+        ConversionRequest req = ConversionRequest.newBuilder()
+                .setValue(10)
+                .setFromUnit("LITER")
+                .setToUnit("MILE")
+                .build();
+
+        ConversionResponse res = converterStub.convert(req);
+
+        assertFalse(res.getIsSuccess());
+        assertTrue(res.getError().contains("unsupported unit"));
+    }
+    //testing a negative length value
+    @Test
+    public void testNegativeLength() {
+        ConversionRequest req = ConversionRequest.newBuilder()
+                .setValue(-1)
+                .setFromUnit("KILOMETER")
+                .setToUnit("MILE")
+                .build();
+
+        ConversionResponse res = converterStub.convert(req);
+
+        assertTrue(res.getIsSuccess()); // it should still convert because distance could be negative (displacement)
+    }
+
+
 
 }
