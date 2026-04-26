@@ -40,6 +40,7 @@ public class ServerTest {
     private EchoGrpc.EchoBlockingStub blockingStub;
     private JokeGrpc.JokeBlockingStub blockingStub2;
     private ConverterGrpc.ConverterBlockingStub converterStub;
+    private LibraryGrpc.LibraryBlockingStub libraryStub;
 
 
     @org.junit.Before
@@ -50,6 +51,7 @@ public class ServerTest {
         blockingStub = EchoGrpc.newBlockingStub(channel);
         blockingStub2 = JokeGrpc.newBlockingStub(channel);
         converterStub = ConverterGrpc.newBlockingStub(channel);
+        libraryStub = LibraryGrpc.newBlockingStub(channel);
     }
 
     @org.junit.After
@@ -243,6 +245,143 @@ public class ServerTest {
 
         assertTrue(res.getIsSuccess()); // it should still convert because distance could be negative (displacement)
     }
+
+    /// ///////////tests for the library service//////////////
+    /// happy paths:
+    @Test
+    public void testListBooksSuccess() {
+        BookListResponse res = libraryStub.listBooks(Empty.newBuilder().build());
+
+        assertTrue(res.getIsSuccess());
+        assertTrue(res.getBooksCount() > 0);
+    }
+    //search books
+    @Test
+    public void testSearchBooksSuccess() {
+        BookSearchRequest req = BookSearchRequest.newBuilder()
+                .setQuery("1984")
+                .build();
+
+        BookListResponse res = libraryStub.searchBooks(req);
+
+        assertTrue(res.getIsSuccess());
+        assertTrue(res.getBooksCount() > 0);
+    }
+    //borrow books
+    @Test
+    public void testBorrowBookSuccess() {
+        BorrowRequest req = BorrowRequest.newBuilder()
+                .setIsbn("978-0141439518") // use real ISBN thats not borrowed
+                .setBorrowerName("TestUser")
+                .build();
+
+        BorrowResponse res = libraryStub.borrowBook(req);
+
+        assertTrue(res.getIsSuccess());
+    }
+    //return book
+    @Test
+    public void testReturnBookSuccess() {
+        String isbn = "978-0451524935";
+
+        // borrow the bookfirst
+        libraryStub.borrowBook(
+                BorrowRequest.newBuilder()
+                        .setIsbn(isbn)
+                        .setBorrowerName("TestUser")
+                        .build()
+        );
+
+        ReturnResponse res = libraryStub.returnBook(
+                ReturnRequest.newBuilder()
+                        .setIsbn(isbn)
+                        .build()
+        );
+
+        assertTrue(res.getIsSuccess());
+    }
+
+    /// /////not so happy paths//////////////
+    //missing borrower name
+    @Test
+    public void testBorrowMissingName() {
+        BorrowRequest req = BorrowRequest.newBuilder()
+                .setIsbn("978-0451524935")
+                .setBorrowerName("")
+                .build();
+
+        BorrowResponse res = libraryStub.borrowBook(req);
+
+        assertFalse(res.getIsSuccess());
+        assertEquals("borrower name is required", res.getError());
+    }
+
+    // book not found
+    @Test
+    public void testBorrowBookNotFound() {
+        BorrowRequest req = BorrowRequest.newBuilder()
+                .setIsbn("012345")
+                .setBorrowerName("User")
+                .build();
+
+        BorrowResponse res = libraryStub.borrowBook(req);
+
+        assertFalse(res.getIsSuccess());
+        assertEquals("book not found", res.getError());
+    }
+    //book was already borrowed
+    @Test
+    public void testBorrowAlreadyBorrowed() {
+        String isbn = "978-0451524935";
+
+        libraryStub.borrowBook(
+                BorrowRequest.newBuilder()
+                        .setIsbn(isbn)
+                        .setBorrowerName("User1")
+                        .build()
+        );
+
+        BorrowResponse res = libraryStub.borrowBook(
+                BorrowRequest.newBuilder()
+                        .setIsbn(isbn)
+                        .setBorrowerName("User2")
+                        .build()
+        );
+        assertFalse(res.getIsSuccess());
+        assertEquals("book is already borrowed", res.getError());
+    }
+    @Test
+    //persistence test
+    public void testBorrowPersistence() {
+        String isbn = "978-0451524935";
+
+        // borrow book
+        libraryStub.borrowBook(
+                BorrowRequest.newBuilder()
+                        .setIsbn(isbn)
+                        .setBorrowerName("PersistUser")
+                        .build()
+        );
+
+        // simulates "after restart" by just calling list again
+        BookListResponse res = libraryStub.listBooks(Empty.newBuilder().build());
+
+        boolean found = false;
+
+        for (Book b : res.getBooksList()) {
+            if (b.getIsbn().equals(isbn) && b.getIsBorrowed()) {
+                found = true;
+            }
+        }
+
+        assertTrue(found);
+    }
+
+
+
+
+
+
 
 
 
