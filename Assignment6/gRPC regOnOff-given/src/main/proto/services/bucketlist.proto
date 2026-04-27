@@ -1,3 +1,25 @@
+/**
+ * BucketList Service
+ *
+ * This service allows users to manage a personal bucket list.
+ * Users can add new goals, view all goals, mark goals as completed,
+ * and delete goals.
+ *
+ * Features:
+ * - Supports multiple RPC methods (addItem, listItems, completeItem, deleteItem)
+ * - Each request requires input (description or item ID)
+ * - Returns different response types depending on the request
+ * - Uses a repeated field to return a list of items
+ * - Maintains persistent data using a JSON file on the server
+ *
+ * Persistence:
+ * - Data is stored in "bucket_data.json"
+ * - On server startup, existing data is loaded from the file
+ * - Changes (add, complete, delete) are saved immediately
+ *
+ * This service demonstrates a simple but fully functional stateful gRPC service.
+ */
+
 syntax = "proto3";
 
 option java_multiple_files = true;
