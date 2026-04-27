@@ -42,7 +42,7 @@ The Library service manages a collection of books with the following functionali
 - Borrow books
 - Return books
 
-This is a stateful service
+This is a stateful service. The library initializes from a clean state on first run. After that, data persists. 
 
 ### Bucketlist Service (Custom service)
 
