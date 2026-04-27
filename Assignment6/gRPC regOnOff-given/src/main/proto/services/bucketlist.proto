@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "service";
+option java_outer_classname = "BucketListProto";
+
+import "google/protobuf/empty.proto";
+
+package services;
+
+//service defintiions
+service BucketList {
+  rpc addItem (AddItemRequest) returns (ItemResponse);
+  rpc listItems(google.protobuf.Empty) returns (ItemListResponse);
+  rpc completeItem (ItemRequest) returns (ItemResponse);
+  rpc deleteItem (ItemRequest) returns (ItemResponse); 
+
+}
+// A bucket list item
+message Item {
+  string id = 1;
+  string description = 2;
+  bool is_completed = 3;
+}
+
+// request to add item
+message AddItemRequest {
+  string description = 1;
+}
+
+//request to identify an item
+message ItemRequest {
+  string id =1;
+}
+
+//Response for single actions
+message ItemResponse {
+  bool isSuccess =1;
+  string message =2;
+  string error =3;
+}
+
+//Response for listing items
+message ItemListResponse {
+  bool isSuccess =1;
+  repeated Item items =2;
+  string error =3;
+}
