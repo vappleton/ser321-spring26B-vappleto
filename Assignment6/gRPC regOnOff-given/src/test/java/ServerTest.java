@@ -270,6 +270,13 @@ public class ServerTest {
     //borrow books
     @Test
     public void testBorrowBookSuccess() {
+        //returning the book first to make sure it's available, otherwise the test will fail if the book was borrowed in previous runs
+        ReturnRequest retReq = ReturnRequest.newBuilder()
+                .setIsbn("978-0141439518")
+                .build();
+
+        libraryStub.returnBook(retReq);
+
         BorrowRequest req = BorrowRequest.newBuilder()
                 .setIsbn("978-0141439518") // use real ISBN thats not borrowed
                 .setBorrowerName("TestUser")
