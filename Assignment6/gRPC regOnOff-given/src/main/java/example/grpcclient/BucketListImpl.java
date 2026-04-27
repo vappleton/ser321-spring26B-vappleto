@@ -1,3 +1,33 @@
+/**
+ * BucketListImpl implements the BucketList gRPC service.
+ *
+ * This service allows clients to:
+ * - Add new bucket list items
+ * - List all items
+ * - Mark items as completed
+ * - Delete items
+ *
+ * Each item is stored with:
+ * - A unique ID (UUID)
+ * - A description
+ * - A completion status
+ *
+ * Persistence:
+ * - All data is stored in a JSON file ("bucket_data.json")
+ * - Data is loaded when the server starts
+ * - Data is saved after every modification (add, complete, delete)
+ *
+ * Design Notes:
+ * - Uses a HashMap for fast lookup by ID
+ * - Uses UUIDs internally for uniqueness
+ * - Client displays items using user-friendly indexing instead of UUIDs
+ *
+ * This implementation satisfies the assignment requirements by supporting
+ * multiple RPC methods, handling input validation, returning different response types,
+ * using repeated fields, and maintaining persistent server-side data.
+ */
+
+
 package example.grpcclient;
 
 import com.google.protobuf.Empty;
