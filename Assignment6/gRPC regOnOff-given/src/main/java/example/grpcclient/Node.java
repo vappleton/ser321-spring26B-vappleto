@@ -40,6 +40,7 @@ public class Node {
         .addService(new RegistryAnswerImpl(services))
         .addService(new ConverterImpl())
         .addService(new LibraryImpl())
+        .addService(new BucketListImpl())
         .build().start();
 
     for (var service : server.getServices()) {
