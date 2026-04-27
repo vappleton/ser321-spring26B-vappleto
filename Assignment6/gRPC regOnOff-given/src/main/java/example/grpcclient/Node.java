@@ -42,6 +42,7 @@ public class Node {
         .addService(new LibraryImpl())
         .addService(new BucketListImpl())
         .build().start();
+      System.out.println("gRPC server started on port: " + port);
 
     for (var service : server.getServices()) {
       // returns the services that are available from this node
@@ -96,7 +97,7 @@ public class Node {
     int nodePort = 8000;
     try {
       regPort = Integer.parseInt(args[1]);
-      nodePort = Integer.parseInt(args[1]);
+      nodePort = Integer.parseInt(args[3]);
     } catch (NumberFormatException nfe) {
       System.out.println("[Port] must be an integer");
       System.exit(2);
