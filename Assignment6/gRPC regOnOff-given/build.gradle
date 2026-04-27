@@ -155,8 +155,8 @@ task runClient(type: JavaExec) {
   def portArg = project.hasProperty('port') ? project.getProperty('port') : servicePort
 
   // default args
-  args serviceHost 
-  args servicePort
+  args hostArg
+  args portArg
   args registryHost
   args grpcPort
   args message 
