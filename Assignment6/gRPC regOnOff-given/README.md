@@ -1,65 +1,117 @@
-# GRPC Services and Registry
+# GRPC Services 
 
-The following folder contains a Registry.jar which includes a Registering service where Nodes can register to allow clients to find them and use their implemented GRPC services. 
+This project implements multiple gRPC services, including both provided and custom functionality. The services demonstrate both stateless and stateful designs, 
+ input validation, and persistent storage: 
 
-Some more detailed explanations will follow and please also check the build.gradle file
+- ConverterService (stateless unit conversion)
+- Library Service (stateful book management with persistence)
+- BucketList Service (Custom stateful service for managing personal bucketlist items)
 
-## Run things locally without registry
-To run see also video. To run locally and without Registry which you should do for the beginning
+Each service fulfills core assignment requirements:
+- Supporting multiple RPC requests
+- Accepting structured input from clients
+- Returning different response types
+- Using repeated fields for list-based responses
+- Maintaining persistent data on the server (for stateful services)
 
-First Terminal
+## How to run the program
+**Step 1: Start the server with:**  
 
-    gradle runNode
+    gradle runNode 
 
-Second Terminal
+**Step 2: Start the client ina new terminal with:**  
 
-    gradle runClient
+    gradle runClient  
 
-## Run things locally with registry
+The client will connect to the server at `localhost:8000`. 
 
-First terminal
+## Implemented services:
 
-    gradle runRegistryServer
+### Converter Service
+The converter service provides unit conversion multiple categories:  
+- Length (Kilometers, miles, yards, feet)  
+- Weight (Kilograms, pounds)
+- Temperature (Celsius, Fahrenheit)
 
-Second terminal
+This is a stateless service
 
-    gradle runNode -PregOn=true 
+### Library Service
+The Library service manages a collection of books with the following functionality:
+- List all books
+- Search books by title or author
+- Borrow books
+- Return books
 
-Third Terminal
+This is a stateful service
 
-    gradle runClient -PregOn=true
+### Bucketlist Service (Custom service)
 
-### gradle runRegistryServer
-Will run the Registry node on localhost (arguments are possible see gradle). This node will run and allows nodes to register themselves. 
+The BucketList service allows users to manage a list of personal goals or experiences (bucketlist items). 
+This service has the following functionality:
+- Add new items
+- List all items
+- Mark items as completed
+- Delete items
 
-The Server allows Protobuf, JSON and gRPC. We will only be using gRPC
+This is a stateful service
 
-### gradle runNode
-Will run a node with services. The starter code includes Echo and Joke services as examples. You will need to implement and add the Converter and Library services.
 
-For the Library service: A books.txt file is provided with initial book data (format: title|author|isbn, one per line). Your server should load this on first run and create library_data.json for persistence.
+## How to use the program
 
-The node registers itself on the Registry. You can change the host and port the node runs on and this will register accordingly with the Registry
+When the client starts, the user is prompted to select a service:
 
-### gradle runClient
-Will run a client which will call the services from the node, it talks to the node directly not through the registry. At the end the client does some calls to the Registry to pull the services, this will be needed later.
+1. Converter
+2. Library
+3. BucketList
 
-### gradle runDiscovery
-Will create a couple of threads with each running a node with services in JSON and Protobuf. This is just an example and not needed for assignment 6. 
+### Converter Service
+- Enter a numeric value  
+- Enter a source unit (e.g., KILOMETER, POUND, CELSIUS)
+- Enter a target unit  
+The program returns the converted value or an error message
 
-### gradle testProtobufRegistration
-Registers the protobuf nodes from runDiscovery and do some calls. 
+### Library Service
+Options:
+- List books: Displays all the books
+- Search books: Prompts user to enter title or author
+- Borrow book: prompts user to enter ISBN and name
+- Return book:  prompts user to enter ISBN  
+The system validates input and displays appropriate messages. 
 
-### gradle testJSONRegistration
-Registers the json nodes from runDiscovery and do some calls. 
+### BucketList Service  
+Options:
+- Add item:  Prompts user to enter description
+- List items: displays a numbered list of bucketlist items
+- Complete item: prompts user to select the item number to mark as completed.
+- Delete item: prompts user to select item number to be dleeted.  
 
-### gradle test
-Runs the test cases. The starter code includes example tests for Joke and Echo in ServerTest.java. You need to add your own tests for Converter and Library services in the same file.
+Notes: 
+- Items are shown with simple numbering for ease of use
+- Internally, UUIDs are used for identification
+- Invalid selections are handled gracefully
+
+## Screencast Link
+
+
+## List of Requirements fulfilled:  
+The project satisfies the following requirements:  
+- Service allows multiple requests (Converter, Library and BucketList all support multiple RPC methods)
+- Each request includes required input (value, units, ISBN, descriptions, etc.)
+- Different responses are returned depending on the request (conversion results, lists, status messages)
+- Repeated fields are used (e.g., listBooks, listItems)
+- Persisten data storage is implemented (Library and BucketList use JSON files)
+- Client provides a user-friendly interface with menu-driven interaction
+- Server handles invalid input gracefully without crashing
+
+
+## gradle test
 
 IMPORTANT: Tests expect the server to be running first!
-First run in one terminal:
-    gradle runNode
-Then in second terminal:
+First run in one terminal:  
+
+    gradle runNode  
+Then in second terminal:   
+    
     gradle test
 
 The tests connect to localhost:8000 by default.
