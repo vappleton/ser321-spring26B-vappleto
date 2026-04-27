@@ -151,6 +151,9 @@ task runClient(type: JavaExec) {
   description = "Run Client"
   main = 'example.grpcclient.Client'
   standardInput = System.in
+  def hostArg = project.hasProperty('host') ? project.getProperty('host') : serviceHost
+  def portArg = project.hasProperty('port') ? project.getProperty('port') : servicePort
+
   // default args
   args serviceHost 
   args servicePort
