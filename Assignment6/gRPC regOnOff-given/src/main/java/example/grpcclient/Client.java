@@ -3,6 +3,9 @@ package example.grpcclient;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+
+import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import service.*;
 
@@ -20,7 +23,8 @@ public class Client {
   private final RegistryGrpc.RegistryBlockingStub blockingStub3;
   private final RegistryGrpc.RegistryBlockingStub blockingStub4;
   private final ConverterGrpc.ConverterBlockingStub converterStub; //converter stub
-  private  final LibraryGrpc.LibraryBlockingStub libraryStub; //library stub
+  private final LibraryGrpc.LibraryBlockingStub libraryStub; //library stub
+  private final BucketListGrpc.BucketListBlockingStub bucketStub;
 
   /** Construct client for accessing server using the existing channel. */
   public Client(Channel channel, Channel regChannel) {
@@ -36,6 +40,7 @@ public class Client {
     blockingStub4 = RegistryGrpc.newBlockingStub(channel);
     converterStub = ConverterGrpc.newBlockingStub(channel);
     libraryStub = LibraryGrpc.newBlockingStub(channel);
+    bucketStub = BucketListGrpc.newBlockingStub(channel);
   }
 
   /** Construct client for accessing server using the existing channel. */
@@ -52,6 +57,7 @@ public class Client {
     blockingStub4 = null;
     converterStub = ConverterGrpc.newBlockingStub(channel);
     libraryStub = LibraryGrpc.newBlockingStub(channel);
+    bucketStub = BucketListGrpc.newBlockingStub(channel);
   }
 
   public void askServerToParrot(String message) {
@@ -217,15 +223,16 @@ public class Client {
       // ask the user for input how many jokes the user wants
       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
 
-        System.out.println("Services on the connected node. (without registry)");
-        client.getNodeServices(); // get all registered services
+        //System.out.println("Services on the connected node. (without registry)");
+        //client.getNodeServices(); // get all registered services
 
 
         while (true) {
           System.out.println("\nChoose a service:");
           System.out.println("1. Converter");
           System.out.println("2. Library");
-          System.out.println("3. Exit");
+          System.out.println("3. BucketList");
+          System.out.println("4. Exit");
 
           String choice = reader.readLine();
 
@@ -237,6 +244,9 @@ public class Client {
                   handleLibrary(client, reader);
                   break;
               case "3":
+                  handleBucketList(client, reader);
+                  break;
+              case "4":
                   return;
               default:
                   System.out.println("Invalid option");
@@ -473,4 +483,129 @@ public class Client {
       }
 
     }
+    private static void handleBucketList(Client client, BufferedReader reader) throws IOException {
+        System.out.println("Bucket List Options:");
+        System.out.println("1. Add item");
+        System.out.println("2. List items");
+        System.out.println("3. Complete item");
+        System.out.println("4. Delete item");
+
+        String choice = reader.readLine();
+
+        switch (choice) {
+            //add items to the bucket list
+            case "1":
+                System.out.println("Enter item description:");
+                String desc = reader.readLine();
+
+                AddItemRequest addReq = AddItemRequest.newBuilder()
+                        .setDescription(desc)
+                        .build();
+
+                ItemResponse addRes = client.bucketStub.addItem(addReq);
+
+                if (addRes.getIsSuccess()) {
+                    System.out.println(addRes.getMessage());
+                } else {
+                    System.out.println(addRes.getError());
+                }
+                break;
+            //list items in the bucket list
+             case "2":
+                 ItemListResponse listRes = client.bucketStub.listItems(Empty.newBuilder().build());
+
+                 if (listRes.getIsSuccess()) {
+                     List<Item> items = listRes.getItemsList();
+
+                     for (int i = 0; i < items.size(); i++) {
+                         Item item = items.get(i);
+
+                         System.out.println(
+                                 (i + 1) + ". " +
+                                         item.getDescription() +
+                                         (item.getIsCompleted() ? " (Completed)" : "")
+                         );
+                     }
+                 } else {
+                     System.out.println(listRes.getError());
+                 }
+                 break;
+
+            //complete an item
+            case "3":
+                ItemListResponse compList = client.bucketStub.listItems(Empty.newBuilder().build());
+
+                if (!compList.getIsSuccess()) {
+                    System.out.println(compList.getError());
+                    return;
+                }
+
+                List<Item> compItems = compList.getItemsList();
+
+                for (int i = 0; i < compItems.size(); i++) {
+                    Item item = compItems.get(i);
+                    System.out.println((i + 1) + ". " + item.getDescription());
+                }
+
+                System.out.println("Select item number:");
+                int compChoice = Integer.parseInt(reader.readLine());
+
+                if (compChoice < 1 || compChoice > compItems.size()) {
+                    System.out.println("Invalid selection");
+                    return;
+                }
+
+                String compId = compItems.get(compChoice - 1).getId();
+
+                ItemResponse compRes = client.bucketStub.completeItem(
+                        ItemRequest.newBuilder().setId(compId).build()
+                );
+
+                System.out.println(
+                        compRes.getIsSuccess() ? compRes.getMessage() : compRes.getError()
+                );
+                break;
+
+                //delete an item
+
+            case "4":
+                ItemListResponse delList = client.bucketStub.listItems(Empty.newBuilder().build());
+
+                if (!delList.getIsSuccess()) {
+                    System.out.println(delList.getError());
+                    return;
+                }
+
+                List<Item> delItems = delList.getItemsList();
+
+                for (int i = 0; i < delItems.size(); i++) {
+                    Item item = delItems.get(i);
+                    System.out.println((i + 1) + ". " + item.getDescription());
+                }
+
+                System.out.println("Select item number:");
+                int delChoice = Integer.parseInt(reader.readLine());
+
+                if (delChoice < 1 || delChoice > delItems.size()) {
+                    System.out.println("Invalid selection");
+                    return;
+                }
+
+                String delId = delItems.get(delChoice - 1).getId();
+
+                ItemResponse delRes = client.bucketStub.deleteItem(
+                        ItemRequest.newBuilder().setId(delId).build()
+                );
+
+                System.out.println(
+                        delRes.getIsSuccess() ? delRes.getMessage() : delRes.getError()
+                );
+
+                break;
+
+            default:
+                System.out.println("Invalid option");
+        }
+    }
+
 }
