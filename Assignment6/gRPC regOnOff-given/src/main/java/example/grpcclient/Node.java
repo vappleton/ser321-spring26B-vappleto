@@ -93,7 +93,7 @@ public class Node {
       System.exit(1);
     }
     int regPort = 9003;
-    int nodePort = 9099;
+    int nodePort = 8000;
     try {
       regPort = Integer.parseInt(args[1]);
       nodePort = Integer.parseInt(args[3]);
