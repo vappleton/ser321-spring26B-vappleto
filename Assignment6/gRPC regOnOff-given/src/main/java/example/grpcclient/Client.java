@@ -171,6 +171,7 @@ public class Client {
       System.out.println("[Port] must be an integer");
       System.exit(2);
     }
+      System.out.println("Host: " + host + " Port: " + port);
 
     // Create a communication channel to the server (Node), known as a Channel. Channels
     // are thread-safe
