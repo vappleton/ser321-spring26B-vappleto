@@ -42,7 +42,7 @@ public class Node {
         .addService(new LibraryImpl())
         .addService(new BucketListImpl())
         .build().start();
-      System.out.println("gRPC server started on port: " + port);
+
 
     for (var service : server.getServices()) {
       // returns the services that are available from this node
@@ -103,12 +103,7 @@ public class Node {
       System.exit(2);
     }
     final Node server = new Node(nodePort);
-    System.out.println(args[0]);
-    System.out.println(args[1]);
-    System.out.println(args[2]);
-    System.out.println(args[3]);
 
-    System.out.println(args[4]);
 
     // Comment the next 2 lines for your local client server development (Activity 2 task 1, you need this part again for Task 2)
     if (args[5].equals("true")) { // since I am too lazy to convert it to bool
