@@ -159,7 +159,7 @@ public class Client {
           .println("Expected arguments: <host(String)> <port(int)> <regHost(string)> <regPort(int)> <message(String)> <regOn(bool)>");
       System.exit(1);
     }
-    int port = 9099;
+    int port = Integer.parseInt(args[1]);
     int regPort = 9003;
     String host = args[0];
     String regHost = args[2];
