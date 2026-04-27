@@ -96,7 +96,7 @@ public class Node {
     int nodePort = 8000;
     try {
       regPort = Integer.parseInt(args[1]);
-      nodePort = Integer.parseInt(args[3]);
+      nodePort = Integer.parseInt(args[1]);
     } catch (NumberFormatException nfe) {
       System.out.println("[Port] must be an integer");
       System.exit(2);
