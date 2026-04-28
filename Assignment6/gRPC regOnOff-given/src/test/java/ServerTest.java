@@ -292,12 +292,13 @@ public class ServerTest {
         String isbn = "978-0451524935";
 
         // borrow the bookfirst
-        libraryStub.borrowBook(
+        BorrowResponse  borrowRes = libraryStub.borrowBook(
                 BorrowRequest.newBuilder()
                         .setIsbn(isbn)
                         .setBorrowerName("TestUser")
                         .build()
         );
+        assertTrue(borrowRes.getIsSuccess());
 
         ReturnResponse res = libraryStub.returnBook(
                 ReturnRequest.newBuilder()
