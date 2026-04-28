@@ -453,10 +453,11 @@ public class Client {
                                           " | Borrowed by: " + book.getBorrowedBy()
                           );
                       }
-                      if (!foundBorrowed) {
-                          System.out.println("No books are currently borrowed.");
-                          return;
-                      }
+
+                  }
+                  if (!foundBorrowed) {
+                      System.out.println("No books are currently borrowed.");
+                      return;
                   }
               }
               System.out.println("Enter ISBN: ");
